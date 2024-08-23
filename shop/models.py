@@ -1,10 +1,6 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from user.models import Seller
 # Create your models here.
-
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -18,7 +14,7 @@ class Category(models.Model):
         self.slug = self.name.replace(" ", "-")
         super(Category, self).save(*args, **kwargs)
 
-# Create your models here.
+
 class Product(models.Model):
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
