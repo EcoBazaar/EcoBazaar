@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Address, Customer, Seller, Order, OrderItem
+from .models import Address, Customer, Seller, Order, OrderItem, Cart, CartItem
 
 
 class AddressSeriaizer(serializers.ModelSerializer):
@@ -31,3 +31,16 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = '__all__'
+        
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = '__all__'
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = '__all__'
+
