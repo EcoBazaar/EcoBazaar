@@ -14,6 +14,17 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.11]
+        
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        ports:
+          - 5432:5432  
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5      
 
     steps:
     - uses: actions/checkout@v4
@@ -25,12 +36,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+
+    - name: Run migartions
+      run: |
+        python manage.py migrate   
+        
     - name: Run Tests
       run: |
         python manage.py test
 
     - name: check flake8
       run: |
-        flake8 ./shop/*.py 
-        flake8 ./user/*.py
+        flake8 ./shop/*.py ./user/*.py
       
