@@ -1,4 +1,4 @@
-name: Django, PostgresSQL CI
+name: Django
 
 on:
   push:
