@@ -1,14 +1,42 @@
-from user.models import Seller
-from user.serializers import CustomerSerializer, SellerSerializer
-from user.serializers import UserSerializer
-
-from rest_framework import generics
-from rest_framework import permissions
 from rest_framework.response import Response, status
 from rest_framework.views import APIView
 
 
-# SellerList
+from rest_framework import generics
+from rest_framework import permissions
+
+from profile.permission import IsOwnerOrAdmin
+from profile.models import (
+    Customer, 
+    Seller, 
+    Order, 
+    OrderItem, 
+    Cart, 
+    CartItem
+    )
+from profile.serializers import (
+    CustomerSerializer,
+    SellerSerializer,
+    CartItemSerializer,
+    CartSerializer,
+    OrderSerializer,
+    OrderItemSerializer,
+    AddressSeriaizer,
+    UserSerializer,
+    SellerUsernameSerializer,
+    )
+
+
+class CustomerCreate(generics.CreateAPIView):
+    permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsOwnerOrAdmin]
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
 
 class SellerList(generics.ListAPIView):
     permission_classes = [permissions.IsAdminUser]
@@ -16,15 +44,18 @@ class SellerList(generics.ListAPIView):
     serializer_class = SellerSerializer
 
 
-# SellerDetail
-
 class SellerDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsOwnerOrAdmin]
     queryset = Seller.objects.all()
-    serializer_class = SellerSerializer
 
+    def get_serializer_class(self):
+        seller = self.get_object()
 
-# RegisterView
+        # Check if the requesting user is the seller or an admin
+        if self.request.user == seller.user or self.request.user.is_staff:
+            return SellerSerializer  # Full profile for seller and admin
+        else:
+            return SellerUsernameSerializer  # Limited profile for others
 
 class RegisterView(APIView):
     def post(self, request, *args, **kwargs):

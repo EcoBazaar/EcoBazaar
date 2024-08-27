@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-
+from shop.serializers import ProductSerializer
 from .models import Address, Customer, Seller, Order, OrderItem, Cart, CartItem
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,8 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
             last_name=validated_data.get('last_name', '')
         )
         return user
-
-
 
 class AddressSeriaizer(serializers.ModelSerializer):
     class Meta:
@@ -64,3 +62,44 @@ class CartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = '__all__'
 
+
+
+class SellerUsernameSerializer(serializers.ModelSerializer):
+    products = ProductSerializer(many=True, read_only=True, source='seller')
+
+    class Meta:
+        model = Seller
+        fields = ['user', 'products']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['username'] = instance.user.username
+        representation.pop('user', None)
+        return representation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class SellerUsernameSerializer(serializers.ModelSerializer):
+    products = ProductSerializer(many=True, read_only=True, source='seller')
+
+    class Meta:
+        model = Seller
+        fields = ['user', 'products']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['username'] = instance.user.username
+        representation.pop('user', None)
+        return representation
