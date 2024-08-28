@@ -6,7 +6,8 @@ from shop.serializers import (
 )
 from rest_framework import generics, filters
 from rest_framework import permissions
-from rest_framework.response import Response, status
+from rest_framework import status
+from rest_framework.response import Response
 
 
 # ProductList and ProductDetail views created

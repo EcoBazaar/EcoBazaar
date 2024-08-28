@@ -1,4 +1,4 @@
-from rest_framework.response import Response, status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import permissions
@@ -69,6 +69,7 @@ class SellerDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class RegisterView(APIView):
+    permission_classes = []
     def post(self, request, *args, **kwargs):
         # Serialize the User data
         user_serializer = UserSerializer(data=request.data)
@@ -188,6 +189,8 @@ class CartItemList(generics.ListCreateAPIView):
         )
 
     def add_product_in_cart(self, serializer):
+        cartlist = CartList()
+        cartlist.save_user_cart()      ### we need to test it
         cart_id = self.kwargs.get("cart_id")
         cart = Cart.objects.get(id=cart_id)
         product = serializer.validated_data["product"]
