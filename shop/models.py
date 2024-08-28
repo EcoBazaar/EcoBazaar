@@ -22,7 +22,7 @@ class Product(models.Model):
     is_new = models.BooleanField(default=False)
     stock = models.IntegerField()
     seller = models.ForeignKey(
-        "user.Seller", related_name="seller", on_delete=models.CASCADE
+        "profile.Seller", related_name="seller", on_delete=models.CASCADE
     )
     category = models.ForeignKey(
         Category, related_name="category", on_delete=models.CASCADE
