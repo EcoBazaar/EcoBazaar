@@ -18,7 +18,7 @@ class Address(models.Model):
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.ForeignKey(
-        Address, on_delete=models.CASCADE, related_name="customer_address"
+        Address, on_delete=models.CASCADE, related_name="customer_address", blank=True, null=True
     )
 
     def __str__(self):
@@ -28,7 +28,7 @@ class Customer(models.Model):
 class Seller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.ForeignKey(
-        Address, on_delete=models.CASCADE, related_name="seller_address"
+        Address, on_delete=models.CASCADE, related_name="seller_address", blank=True, null=True
     )
 
     def __str__(self):
