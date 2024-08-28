@@ -79,7 +79,7 @@ class CartItem(models.Model):
     product = models.ForeignKey(
         "shop.Product", on_delete=models.CASCADE, related_name="cart_items"
     )
-    quantity = models.IntegerField()
+    quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
