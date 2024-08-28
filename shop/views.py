@@ -1,5 +1,5 @@
 from shop.models import Product, Category, ProductImage
-from shop.serializer import (
+from shop.serializers import (
     ProductSerializer,
     CategorySerializer,
     ProductImageSerializer,
