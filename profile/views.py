@@ -244,3 +244,88 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
         instance.product.stock += instance.quantity
         instance.product.save()
         return super().destroy(request, *args, **kwargs)
+
+
+class OrderList(generics.ListCreateAPIView):
+    """OrderList view only authenticated customer can access/mofify their order
+    get_queryset method filters the order based on the authenticated user
+    create_order method creates the order and adds the items from the cart to the order 
+    and deletes the cart items"""
+
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsOwnerOrAdmin] # TODO remove access of OWNER after testing
+
+    def get_queryset(self):
+        return Order.objects.filter(customer=self.request.user)
+
+    def create_order(self, serializer):
+        customer = self.request.user
+        cart = Cart.objects.get(customer=customer)
+
+        cart_items = CartItem.objects.filter(cart=cart)
+        if not cart_items:
+            raise serializers.ValidationError({"message": "Cart is empty"})
+        
+        order = serializer.save(customer=customer)
+
+# TODO we need to change the Order and Cart to have the price from product
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity, 
+                shipping_address=customer.address
+            )
+
+        cart_items.delete()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
+    """OrderDetail view only authenticated customer of the order can
+    access/mofify their order
+    get_queryset method filters the order based on the authenticated user and order id
+    update_order method updates the order by adding or removing articles from the order
+    """
+
+    permission_classes = [IsOwnerOrAdmin]  # TODO remove access of OWNER after testing
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        return Order.objects.filter(customer=self.request.user)
+    
+    def choose_address(self, request, *args, **kwargs):
+        order = self.get_object()
+        for address in request.user.address.all():
+            if address.id == request.data.get("address_id"):
+                order.shipping_address = address
+                order.save()
+                return Response(self.get_serializer(order).data, status=status.HTTP_200_OK)
+
+
+    def update_order(self, request, *args, **kwargs):
+        order = self.get_object()
+
+        add_items = request.data.get("add_items", None)
+        remove_items = request.data.get("remove_items", None)
+
+        cart = Cart.objects.get(customer=self.request.user)
+        ## Adding articles to the order 
+        for item in add_items:
+            cart_item = CartItem.objects.get(cart=cart, id=item["cart_item_id"])
+            OrderItem.objects.create(
+                order=order,
+                product=cart_item.product,
+                quantity=cart_item.quantity,
+                shipping_address = self.choose_address(request, *args, **kwargs)
+            )
+            cart_item.delete()
+
+        ## removing articles from the order and complete deleting them from the cart
+        for item_id in remove_items:
+            order_item = OrderItem.objects.get(order=order, id=item_id)
+            order_item.delete()
+        
+        return Response(self.get_serializer(order).data, status=status.HTTP_200_OK)
+    
