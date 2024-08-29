@@ -79,3 +79,4 @@ class ProductSearchView(generics.ListAPIView):
     filter_backends = [filters.SearchFilter]
     # Adjust fields as necessary
     search_fields = ['name', 'description', 'category__name']
+

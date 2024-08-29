@@ -18,6 +18,13 @@ urlpatterns = [
     # path('carts/', CartList.as_view(), name='carts'),
     path('carts/<int:id>/', CartDetail.as_view(), name='carts-detail'),
     path('cart/<int:cart_id>/', CartItemList.as_view(), name='cart'),
+<<<<<<< Updated upstream
     path('cart/<int:cart_id>/<int:pk>/',
          CartItemDetail.as_view(), name='cart-detail'),
+=======
+    path('cart/<int:cart_id>/<int:pk>/', CartItemDetail.as_view(), name='cart-detail'),
+    #Orderdeatil and list
+    
+    
+>>>>>>> Stashed changes
 ]

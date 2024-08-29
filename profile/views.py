@@ -345,8 +345,15 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
         for item_id in remove_items:
             order_item = OrderItem.objects.get(order=order, id=item_id)
             order_item.delete()
+<<<<<<< Updated upstream
 
         return Response(
             self.get_serializer(order).data,
             status=status.HTTP_200_OK
         )
+=======
+        
+        return Response(self.get_serializer(order).data, status=status.HTTP_200_OK)
+    
+
+>>>>>>> Stashed changes
