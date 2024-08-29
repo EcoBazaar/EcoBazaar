@@ -1,29 +1,20 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics
-from rest_framework import permissions
+from rest_framework import generics, permissions, serializers
 from django.contrib.auth import authenticate
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics, serializers, permissions
 
-from profile.permission import IsOwnerOrAdmin
 from profile.models import Customer, Seller, Order, OrderItem, Cart, CartItem
-
 from profile.permission import IsOwnerOrAdmin, IsOwner
-from profile.models import Customer, Seller, Order, OrderItem, Cart, CartItem
 from profile.serializers import (
     CustomerSerializer,
     SellerSerializer,
     CartItemSerializer,
     CartSerializer,
     OrderSerializer,
-    OrderItemSerializer,
-    AddressSeriaizer,
     UserSerializer,
     SellerUsernameSerializer,
 )
@@ -57,7 +48,6 @@ class SellerDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_serializer_class(self):
         seller = self.get_object()
 
-        # Check if the requesting user is the seller or an admin
         if self.request.user == seller.user or self.request.user.is_staff:
             return SellerSerializer  # Full profile for seller and admin
         else:
@@ -68,17 +58,18 @@ class RegisterView(APIView):
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
-        # Serialize the User data
         user_serializer = UserSerializer(data=request.data)
 
         if user_serializer.is_valid():
-            # Save the User instance
             user = user_serializer.save()
 
             # Check the role and create the appropriate profile
             if request.data.get("role") == "seller":
                 seller_serializer = SellerSerializer(
-                    data={"user": user.id, "address": request.data.get("address")}
+                    data={
+                        "user": user.id,
+                        "address": request.data.get("address")
+                    }
                 )
 
                 if seller_serializer.is_valid():
@@ -86,12 +77,16 @@ class RegisterView(APIView):
                 else:
                     user.delete()
                     return Response(
-                        seller_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                        seller_serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST
                     )
 
             else:  # Default to customer if role is not 'seller'
                 customer_serializer = CustomerSerializer(
-                    data={"user": user.id, "address": request.data.get("address")}
+                    data={
+                        "user": user.id,
+                        "address": request.data.get("address")
+                    }
                 )
 
                 if customer_serializer.is_valid():
@@ -99,15 +94,19 @@ class RegisterView(APIView):
                 else:
                     user.delete()
                     return Response(
-                        customer_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                        customer_serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST
                     )
 
             return Response(
-                {"message": "User created successfully"}, status=status.HTTP_201_CREATED
+                {"message": "User created successfully"},
+                status=status.HTTP_201_CREATED
             )
 
-        # Return errors if UserSerializer is invalid
-        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            user_serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class LoginView(APIView):
@@ -123,7 +122,8 @@ class LoginView(APIView):
             return Response({"token": token.key}, status=status.HTTP_200_OK)
         else:
             return Response(
-                {"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Invalid credentials"},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -134,18 +134,20 @@ class LogoutView(APIView):
     def post(self, request, *args, **kwargs):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
-        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CartList(generics.ListCreateAPIView):
-    """CartList and CartDetail views only authenticated users can
+    """
+    CartList and CartDetail views only authenticated users can
     access/mofify their cart or superuser
     get_queryset method filters the cart based on the authenticated user
-    save_user_cart method saves the cart with the authenticated user"""
+    save_user_cart method saves the cart with the authenticated user
+    """
 
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
-    permission_classes = [IsOwnerOrAdmin]  # TODO remove access of OWNER after testing
+    # TODO remove access of OWNER after testing
+    permission_classes = [IsOwnerOrAdmin]
 
     def get_queryset(self):
         return Cart.objects.filter(customer=self.request.user)
@@ -155,10 +157,12 @@ class CartList(generics.ListCreateAPIView):
 
 
 class CartDetail(generics.RetrieveUpdateDestroyAPIView):
-    """CartDetail view only authenticated customer of the cart can
-      access/mofify their cart
+    """
+    CartDetail view only authenticated customer of the cart can
+    access/mofify their cart
     get_queryset method filters the cart based on the
-      authenticated user"""
+    authenticated user
+    """
 
     permission_classes = [IsOwner]
     queryset = Cart.objects.all()
@@ -169,12 +173,14 @@ class CartDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class CartItemList(generics.ListCreateAPIView):
-    """CartItemList view only authenticated customer of the cart
-      can access/mofify their cart or superuser
+    """
+    CartItemList view only authenticated customer of the cart
+    can access/mofify their cart or superuser
     product_in_cart method checks if the product is in stock and
-      adds it to the cart
+    adds it to the cart
     get_queryset method filters the cart based on the authenticated
-    user and cart id"""
+    user and cart id
+    """
 
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
@@ -188,28 +194,30 @@ class CartItemList(generics.ListCreateAPIView):
 
     def add_product_in_cart(self, serializer):
         cartlist = CartList()
-        cartlist.save_user_cart()  ### we need to test it
+        cartlist.save_user_cart()  # TODO we need to test it
         cart_id = self.kwargs.get("cart_id")
         cart = Cart.objects.get(id=cart_id)
         product = serializer.validated_data["product"]
         quantity = serializer.validated_data["quantity"]
 
         if product.stock < quantity:
-            raise serializers.ValidationError({"message": "Product out of stock"})
+            raise serializers.ValidationError(
+                {"message": "Product out of stock"}
+            )
         else:
             product.stock -= cart.quantity
             product.save()
 
 
 class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
-    """CartItemDetail view only authenticated customer of the cart can
-    access/mofify
-      their cart or superuser
-    get_queryset method filters the cart based on the authenticated user,
-    cart id and item id
+    """
+    CartItemDetail view only authenticated customer of the cart can
+    access/mofify their cart or superuser get_queryset method filters
+    the cart based on the authenticated user, cart id and item id
     """
 
-    permission_classes = [IsOwnerOrAdmin]  # TODO remove access of OWNER after testing
+    # TODO remove access of OWNER after testing
+    permission_classes = [IsOwnerOrAdmin]
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
 
@@ -217,7 +225,9 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
         cart_id = self.kwargs.get("cart_id")
         item_id = self.kwargs.get("pk")
         return CartItem.objects.filter(
-            cart__id=cart_id, cart__customer=self.request.user, pk=item_id
+            cart__id=cart_id,
+            cart__customer=self.request.user,
+            pk=item_id
         )
 
     def update(self, request, *args, **kwargs):
@@ -230,14 +240,17 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
             instance.quantity = quantity
             instance.product.stock -= instance.quantity
             instance.product.save()
-            instance.save()  # TODO CHECK WITH A TEST IF THE INSTANCE IS SAVED
+            # TODO CHECK WITH A TEST IF THE INSTANCE IS SAVED
+            instance.save()
             serialaizer = self.get_serializer(instance)
             return Response(serialaizer.data, status=status.HTTP_200_OK)
         return self.destroy(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        """method to delete the product from the cart and add the quantity back
-        to the stock"""
+        """
+        method to delete the product from the cart and
+        add the quantity back to the stock
+        """
         instance = self.get_object()
         instance.product.stock += instance.quantity
         instance.product.save()
@@ -245,14 +258,17 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class OrderList(generics.ListCreateAPIView):
-    """OrderList view only authenticated customer can access/mofify their order
+    """
+    OrderList view only authenticated customer can access/mofify their order
     get_queryset method filters the order based on the authenticated user
-    create_order method creates the order and adds the items from the cart to the order
-    and deletes the cart items"""
+    create_order method creates the order and adds the items
+    from the cart to the order and deletes the cart items
+    """
 
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [IsOwnerOrAdmin]  # TODO remove access of OWNER after testing
+    # TODO remove access of OWNER after testing
+    permission_classes = [IsOwnerOrAdmin]
 
     def get_queryset(self):
         return Order.objects.filter(customer=self.request.user)
@@ -263,11 +279,14 @@ class OrderList(generics.ListCreateAPIView):
 
         cart_items = CartItem.objects.filter(cart=cart)
         if not cart_items:
-            raise serializers.ValidationError({"message": "Cart is empty"})
+            raise serializers.ValidationError(
+                {"message": "Cart is empty"}
+            )
 
         order = serializer.save(customer=customer)
 
-        # TODO we need to change the Order and Cart to have the price from product
+        # TODO we need to change the Order and Cart
+        # to have the price from product
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
@@ -281,13 +300,15 @@ class OrderList(generics.ListCreateAPIView):
 
 
 class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
-    """OrderDetail view only authenticated customer of the order can
-    access/mofify their order
-    get_queryset method filters the order based on the authenticated user and order id
-    update_order method updates the order by adding or removing articles from the order
+    """
+    OrderDetail view only authenticated customer of the order can
+    access/mofify their order get_queryset method filters the
+    order based on the authenticated user and order id update_order
+    method updates the order by adding or removing articles from the order
     """
 
-    permission_classes = [IsOwnerOrAdmin]  # TODO remove access of OWNER after testing
+    # TODO remove access of OWNER after testing
+    permission_classes = [IsOwnerOrAdmin]
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
@@ -301,7 +322,8 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
                 order.shipping_address = address
                 order.save()
                 return Response(
-                    self.get_serializer(order).data, status=status.HTTP_200_OK
+                    self.get_serializer(order).data,
+                    status=status.HTTP_200_OK
                 )
 
     def update_order(self, request, *args, **kwargs):
@@ -311,9 +333,10 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
         remove_items = request.data.get("remove_items", None)
 
         cart = Cart.objects.get(customer=self.request.user)
-        ## Adding articles to the order
+        # Adding articles to the order
         for item in add_items:
-            cart_item = CartItem.objects.get(cart=cart, id=item["cart_item_id"])
+            cart_item = CartItem.objects.get(
+                cart=cart, id=item["cart_item_id"])
             OrderItem.objects.create(
                 order=order,
                 product=cart_item.product,
@@ -322,19 +345,11 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
             )
             cart_item.delete()
 
-        ## removing articles from the order and complete deleting them from the cart
         for item_id in remove_items:
             order_item = OrderItem.objects.get(order=order, id=item_id)
             order_item.delete()
 
-        return Response(self.get_serializer(order).data, status=status.HTTP_200_OK)
-
-
-# Filter Set View Seller 
-
-
-class SellerFilterView(generics.ListAPIView):
-    queryset = Seller.objects.all()
-    serializer_class = SellerSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = SellerFilter
+        return Response(
+            self.get_serializer(order).data,
+            status=status.HTTP_200_OK
+        )

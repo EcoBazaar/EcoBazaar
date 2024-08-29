@@ -13,9 +13,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProductFilter
 
 
-# ProductList and ProductDetail views created
-
-
 class ProductList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Product.objects.all()
@@ -39,9 +36,6 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
 
 
-# CategoryList and CategoryDetail views created
-
-
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -62,9 +56,6 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     ]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-
-
-# ProductImageList and ProductImageDetail views created
 
 
 class ProductImageList(generics.ListCreateAPIView):
@@ -91,9 +82,6 @@ class ProductImageDetail(generics.RetrieveUpdateDestroyAPIView):
     ]
     queryset = ProductImage.objects.all()
     serializer_class = ProductImageSerializer
-
-
-# SearchView
 
 
 class ProductSearchView(generics.ListAPIView):

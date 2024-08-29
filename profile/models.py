@@ -18,11 +18,8 @@ class Address(models.Model):
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.ForeignKey(
-        Address,
-        on_delete=models.CASCADE,
-        related_name="customer_address",
-        blank=True,
-        null=True,
+        Address, on_delete=models.CASCADE,
+        related_name="customer_address", blank=True, null=True
     )
 
     def __str__(self):
@@ -32,11 +29,8 @@ class Customer(models.Model):
 class Seller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.ForeignKey(
-        Address,
-        on_delete=models.CASCADE,
-        related_name="seller_address",
-        blank=True,
-        null=True,
+        Address, on_delete=models.CASCADE,
+        related_name="seller_address", blank=True, null=True
     )
 
     def __str__(self):
@@ -64,8 +58,7 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, related_name="order_items"
-    )
+        Order, on_delete=models.CASCADE, related_name="order_items")
     product = models.ForeignKey(
         "shop.Product", on_delete=models.CASCADE, related_name="order_items"
     )
@@ -85,7 +78,8 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE, related_name="cart_items")
     product = models.ForeignKey(
         "shop.Product", on_delete=models.CASCADE, related_name="cart_items"
     )

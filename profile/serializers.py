@@ -50,7 +50,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = "__all__"
+        fields = '__all__'
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -63,21 +63,6 @@ class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = "__all__"
-
-
-class SellerUsernameSerializer(serializers.ModelSerializer):
-    products = ProductSerializer(many=True, read_only=True, source="seller")
-
-    class Meta:
-        model = Seller
-        fields = ["user", "products"]
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation["username"] = instance.user.username
-        representation.pop("user", None)
-        return representation
-
 
 class SellerUsernameSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True, read_only=True, source="seller")
