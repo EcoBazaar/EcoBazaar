@@ -92,7 +92,8 @@ class ProductSearchView(generics.ListAPIView):
     search_fields = ["name", "description", "category__name"]
 
 
-# Filter Set View Product Filter 
+# Filter Set View Product Filter
+
 
 class ProductFilterView(generics.ListAPIView):
     queryset = Product.objects.all()
