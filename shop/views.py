@@ -10,9 +10,6 @@ from rest_framework import status
 from rest_framework.response import Response
 
 
-# ProductList and ProductDetail views created
-
-
 class ProductList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Product.objects.all()
@@ -34,9 +31,6 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
 
 
-# CategoryList and CategoryDetail views created
-
-
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -55,9 +49,6 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
         permissions.IsAuthenticatedOrReadOnly, permissions.IsAdminUser]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-
-
-# ProductImageList and ProductImageDetail views created
 
 
 class ProductImageList(generics.ListCreateAPIView):
@@ -81,8 +72,6 @@ class ProductImageDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProductImage.objects.all()
     serializer_class = ProductImageSerializer
 
-
-# SearchView
 
 class ProductSearchView(generics.ListAPIView):
     queryset = Product.objects.all()
