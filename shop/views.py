@@ -17,6 +17,8 @@ class ProductList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
 
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated or not request.user.is_superuser:
@@ -90,13 +92,3 @@ class ProductSearchView(generics.ListAPIView):
     filter_backends = [filters.SearchFilter]
     # Adjust fields as necessary
     search_fields = ["name", "description", "category__name"]
-
-
-# Filter Set View Product Filter
-
-
-class ProductFilterView(generics.ListAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = ProductFilter

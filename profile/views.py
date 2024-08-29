@@ -39,6 +39,8 @@ class SellerList(generics.ListAPIView):
     permission_classes = [permissions.IsAdminUser]
     queryset = Seller.objects.all()
     serializer_class = SellerSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SellerFilter
 
 
 class SellerDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -340,10 +342,3 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
 
         return Response(self.get_serializer(order).data,
                         status=status.HTTP_200_OK)
-
-
-class SellerFilterView(generics.ListAPIView):
-    queryset = Seller.objects.all()
-    serializer_class = SellerSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = SellerFilter
