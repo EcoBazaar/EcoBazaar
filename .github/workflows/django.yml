@@ -51,6 +51,6 @@ jobs:
 
     - name: check flake8
       run: |
-        flake8 ./shop/*.py ./user/*.py
+        flake8 ./shop/*.py ./profile/*.py
 
 
