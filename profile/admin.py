@@ -9,5 +9,3 @@ admin.site.register(Customer)
 admin.site.register(Seller)
 admin.site.register(Order)
 admin.site.register(OrderItem)
-
-

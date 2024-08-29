@@ -12,14 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, serializers, permissions
 
 from profile.permission import IsOwnerOrAdmin
-from profile.models import (
-    Customer, 
-    Seller, 
-    Order, 
-    OrderItem, 
-    Cart, 
-    CartItem
-    )
+from profile.models import Customer, Seller, Order, OrderItem, Cart, CartItem
 
 from profile.permission import IsOwnerOrAdmin, IsOwner
 from profile.models import Customer, Seller, Order, OrderItem, Cart, CartItem
@@ -34,6 +27,9 @@ from profile.serializers import (
     UserSerializer,
     SellerUsernameSerializer,
 )
+
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import SellerFilter
 
 
 class CustomerCreate(generics.CreateAPIView):
@@ -70,6 +66,7 @@ class SellerDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class RegisterView(APIView):
     permission_classes = []
+
     def post(self, request, *args, **kwargs):
         # Serialize the User data
         user_serializer = UserSerializer(data=request.data)
@@ -110,23 +107,24 @@ class RegisterView(APIView):
             )
 
         # Return errors if UserSerializer is invalid
-        return Response(user_serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
     permission_classes = []
+
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+        username = request.data.get("username")
+        password = request.data.get("password")
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key}, status=status.HTTP_200_OK)
+            return Response({"token": token.key}, status=status.HTTP_200_OK)
         else:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class LogoutView(APIView):
@@ -190,7 +188,7 @@ class CartItemList(generics.ListCreateAPIView):
 
     def add_product_in_cart(self, serializer):
         cartlist = CartList()
-        cartlist.save_user_cart()      ### we need to test it
+        cartlist.save_user_cart()  ### we need to test it
         cart_id = self.kwargs.get("cart_id")
         cart = Cart.objects.get(id=cart_id)
         product = serializer.validated_data["product"]
@@ -249,12 +247,12 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
 class OrderList(generics.ListCreateAPIView):
     """OrderList view only authenticated customer can access/mofify their order
     get_queryset method filters the order based on the authenticated user
-    create_order method creates the order and adds the items from the cart to the order 
+    create_order method creates the order and adds the items from the cart to the order
     and deletes the cart items"""
 
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [IsOwnerOrAdmin] # TODO remove access of OWNER after testing
+    permission_classes = [IsOwnerOrAdmin]  # TODO remove access of OWNER after testing
 
     def get_queryset(self):
         return Order.objects.filter(customer=self.request.user)
@@ -266,21 +264,22 @@ class OrderList(generics.ListCreateAPIView):
         cart_items = CartItem.objects.filter(cart=cart)
         if not cart_items:
             raise serializers.ValidationError({"message": "Cart is empty"})
-        
+
         order = serializer.save(customer=customer)
 
-# TODO we need to change the Order and Cart to have the price from product
+        # TODO we need to change the Order and Cart to have the price from product
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
                 product=item.product,
-                quantity=item.quantity, 
-                shipping_address=customer.address
+                quantity=item.quantity,
+                shipping_address=customer.address,
             )
 
         cart_items.delete()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
+
 class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
     """OrderDetail view only authenticated customer of the order can
     access/mofify their order
@@ -294,15 +293,16 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Order.objects.filter(customer=self.request.user)
-    
+
     def choose_address(self, request, *args, **kwargs):
         order = self.get_object()
         for address in request.user.address.all():
             if address.id == request.data.get("address_id"):
                 order.shipping_address = address
                 order.save()
-                return Response(self.get_serializer(order).data, status=status.HTTP_200_OK)
-
+                return Response(
+                    self.get_serializer(order).data, status=status.HTTP_200_OK
+                )
 
     def update_order(self, request, *args, **kwargs):
         order = self.get_object()
@@ -311,14 +311,14 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
         remove_items = request.data.get("remove_items", None)
 
         cart = Cart.objects.get(customer=self.request.user)
-        ## Adding articles to the order 
+        ## Adding articles to the order
         for item in add_items:
             cart_item = CartItem.objects.get(cart=cart, id=item["cart_item_id"])
             OrderItem.objects.create(
                 order=order,
                 product=cart_item.product,
                 quantity=cart_item.quantity,
-                shipping_address = self.choose_address(request, *args, **kwargs)
+                shipping_address=self.choose_address(request, *args, **kwargs),
             )
             cart_item.delete()
 
@@ -326,6 +326,15 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
         for item_id in remove_items:
             order_item = OrderItem.objects.get(order=order, id=item_id)
             order_item.delete()
-        
+
         return Response(self.get_serializer(order).data, status=status.HTTP_200_OK)
-    
+
+
+# Filter Set View Seller 
+
+
+class SellerFilterView(generics.ListAPIView):
+    queryset = Seller.objects.all()
+    serializer_class = SellerSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SellerFilter

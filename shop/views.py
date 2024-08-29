@@ -9,6 +9,9 @@ from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import ProductFilter
+
 
 # ProductList and ProductDetail views created
 
@@ -29,7 +32,9 @@ class ProductList(generics.ListCreateAPIView):
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly, permissions.IsAdminUser]
+        permissions.IsAuthenticatedOrReadOnly,
+        permissions.IsAdminUser,
+    ]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
@@ -52,7 +57,9 @@ class CategoryList(generics.ListCreateAPIView):
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly, permissions.IsAdminUser]
+        permissions.IsAuthenticatedOrReadOnly,
+        permissions.IsAdminUser,
+    ]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
@@ -62,7 +69,9 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class ProductImageList(generics.ListCreateAPIView):
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly, permissions.IsAdminUser]
+        permissions.IsAuthenticatedOrReadOnly,
+        permissions.IsAdminUser,
+    ]
     queryset = ProductImage.objects.all()
     serializer_class = ProductImageSerializer
 
@@ -77,16 +86,28 @@ class ProductImageList(generics.ListCreateAPIView):
 
 class ProductImageDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly, permissions.IsAdminUser]
+        permissions.IsAuthenticatedOrReadOnly,
+        permissions.IsAdminUser,
+    ]
     queryset = ProductImage.objects.all()
     serializer_class = ProductImageSerializer
 
 
 # SearchView
 
+
 class ProductSearchView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [filters.SearchFilter]
     # Adjust fields as necessary
-    search_fields = ['name', 'description', 'category__name']
+    search_fields = ["name", "description", "category__name"]
+
+
+# Filter Set View Product Filter 
+
+class ProductFilterView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
