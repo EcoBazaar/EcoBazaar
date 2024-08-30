@@ -93,7 +93,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name="order_items"
     )
-    cart_item = models.OneToOneField('CartItem', on_delete=models.SET_NULL, null=True, blank=True, related_name='order_item')
+    cart_item = models.OneToOneField('CartItem', on_delete=models.SET_NULL, null=True, blank=True, related_name='order_items')
     quantity = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
