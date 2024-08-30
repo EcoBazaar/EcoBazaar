@@ -146,7 +146,7 @@ class CartList(generics.ListCreateAPIView):
     # TODO remove access of OWNER after testing
     permission_classes = [IsOwnerOrAdmin]
 
-    def get_queryset(self):
+    def get_queryset(self,request, *args, **kwargs):
         return Cart.objects.filter(customer=self.request.user)
 
     def save_user_cart(self, serializer):
@@ -165,7 +165,7 @@ class CartDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
 
-    def get_queryset(self):
+    def get_queryset(self, request, *args, **kwargs):
         return Cart.objects.filter(customer=self.request.user)
 
 
@@ -258,27 +258,27 @@ class OrderList(generics.ListCreateAPIView):
     create_order method creates the order and adds the items
     from the cart to the order and deletes the cart items
     """
-
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     # TODO remove access of OWNER after testing
     permission_classes = [IsOwnerOrAdmin]
 
-    def get_queryset(self):
-        return Order.objects.filter(customer=self.request.user)
 
-    def create_order(self, serializer):
-        customer = self.request.user
+    def create(self, request, *args, **kwargs):
+        # Create the order for the authenticated user
+        customer = request.user
         cart = Cart.objects.get(customer=customer)
 
         cart_items = CartItem.objects.filter(cart=cart)
         if not cart_items:
             raise serializers.ValidationError({"message": "Cart is empty"})
 
+        # Use the serializer to create the order
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         order = serializer.save(customer=customer)
 
-        # TODO we need to change the Order and Cart
-        # to have the price from product
+        # Add cart items to order and delete them from the cart
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
@@ -286,7 +286,7 @@ class OrderList(generics.ListCreateAPIView):
                 quantity=item.quantity,
                 shipping_address=customer.address,
             )
-
+        
         cart_items.delete()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
