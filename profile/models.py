@@ -69,7 +69,9 @@ class Order(models.Model):
     customer = models.ForeignKey(
         Customer, on_delete=models.CASCADE, related_name="customer"
     )
-    product = models.ManyToManyField(Product)
+    cart = models.ForeignKey(
+        "Cart", on_delete=models.SET_NULL, related_name="order", null=True, blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     shipping_address = models.ForeignKey(
         Address,
@@ -91,9 +93,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name="order_items"
     )
-    product = models.ForeignKey(
-        "shop.Product", on_delete=models.CASCADE, related_name="order_items"
-    )
+    cart_item = models.OneToOneField('CartItem', on_delete=models.SET_NULL, null=True, blank=True, related_name='order_item')
     quantity = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 

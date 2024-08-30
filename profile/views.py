@@ -258,14 +258,15 @@ class OrderList(generics.ListCreateAPIView):
     create_order method creates the order and adds the items
     from the cart to the order and deletes the cart items
     """
-
+    print("*"*50)
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     # TODO remove access of OWNER after testing
     permission_classes = [IsOwnerOrAdmin]
 
     def get_queryset(self):
-        return Order.objects.filter(customer=self.request.user)
+        cart_id = self.kwargs.get('cart_id')
+        return Order.objects.filter(customer=self.request.user, cart_id=cart_id)
 
     def create_order(self, serializer):
         customer = self.request.user

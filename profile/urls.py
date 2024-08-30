@@ -7,6 +7,8 @@ from profile.views import (
     CartDetail,
     CartItemList,
     CartItemDetail,
+    OrderList,
+    OrderDetail,
 
 )
 urlpatterns = [
@@ -20,4 +22,7 @@ urlpatterns = [
     path('cart/<int:cart_id>/', CartItemList.as_view(), name='cart'),
     path('cart/<int:cart_id>/<int:pk>/',
          CartItemDetail.as_view(), name='cart-detail'),
+    path('order/<int:cart_id>/', OrderList.as_view(), name='order'),
+    path('order/<int:cart_id>/<int:pk>/',
+         OrderDetail.as_view(), name='order-detail'),     
 ]
