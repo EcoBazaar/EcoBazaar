@@ -1,11 +1,10 @@
 from django.db import models
-# Create your models here.
 
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField()
-    slug = models.SlugField(max_length=200, unique=True)
+    description = models.TextField(blank=True, null=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -18,9 +17,9 @@ class Category(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     is_new = models.BooleanField(default=False)
-    stock = models.IntegerField()
+    stock = models.IntegerField(default=1)
     seller = models.ForeignKey(
         "profile.Seller", related_name="seller", on_delete=models.CASCADE
     )

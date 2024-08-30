@@ -10,8 +10,7 @@ class IsOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Allow access only to the owner of the profile or an admin
         return request.user and (
-            obj.user == request.user or request.user.is_staff
-        )
+            obj.user == request.user or request.user.is_staff)
 
 
 class IsOwner(permissions.BasePermission):
