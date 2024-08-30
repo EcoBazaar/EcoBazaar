@@ -9,6 +9,7 @@ from profile.views import (
     CartItemDetail,
     OrderList,
     OrderDetail,
+    CartList,
 
 )
 urlpatterns = [
@@ -17,8 +18,8 @@ urlpatterns = [
          CustomerDetail.as_view(), name='customer-detail'),
     path('sellers/', SellerList.as_view(), name='sellers'),
     path('seller/<int:id>/', SellerDetail.as_view(), name='seller-detail'),
-    # path('carts/', CartList.as_view(), name='carts'),
-    path('carts/<int:id>/', CartDetail.as_view(), name='carts-detail'),
+    path('carts/<int:id>/', CartList.as_view(), name='carts'),
+    path('carts/<int:id>/<int:pk>/', CartDetail.as_view(), name='carts-detail'),
     path('cart/<int:cart_id>/', CartItemList.as_view(), name='cart'),
     path('cart/<int:cart_id>/<int:pk>/',
          CartItemDetail.as_view(), name='cart-detail'),
