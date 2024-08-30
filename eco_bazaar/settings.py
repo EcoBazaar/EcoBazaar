@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     "shop",
     "profile",
+    "django_filters",
 ]
 
 REST_FRAMEWORK = {
