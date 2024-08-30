@@ -6,9 +6,9 @@ from shop.models import Product
 
 
 class Address(models.Model):
-    address = models.CharField(max_length=250)
+    street = models.CharField(max_length=250)
     postal_code = models.PositiveIntegerField()
-    phone_number = models.PositiveBigIntegerField()
+    phone_number = models.IntegerField()
     city = models.CharField(max_length=100)
 
     def __str__(self):
@@ -18,21 +18,34 @@ class Address(models.Model):
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.ForeignKey(
-        Address, on_delete=models.CASCADE, related_name="customer_address", blank=True, null=True
+        Address,
+        on_delete=models.CASCADE,
+        related_name="customer_address",
+        blank=True,
+        null=True,
     )
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}"
+        if self.user.first_name and self.user.last_name:            
+            return f"{self.user.first_name} {self.user.last_name}"
+        return self.user.username
+        
 
 
 class Seller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.ForeignKey(
-        Address, on_delete=models.CASCADE, related_name="seller_address", blank=True, null=True
+        Address,
+        on_delete=models.CASCADE,
+        related_name="seller_address",
+        blank=True,
+        null=True,
     )
-
+    
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}"
+        if self.user.first_name and self.user.last_name:
+            return f"{self.user.first_name} {self.user.last_name}"
+        return self.user.username
 
 
 class Order(models.Model):
@@ -55,7 +68,9 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name="order_items"
+    )
     product = models.ForeignKey(
         "shop.Product", on_delete=models.CASCADE, related_name="order_items"
     )
@@ -75,7 +90,9 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
+    cart = models.ForeignKey(Cart,
+                             on_delete=models.CASCADE,
+                             related_name="cart_items")
     product = models.ForeignKey(
         "shop.Product", on_delete=models.CASCADE, related_name="cart_items"
     )
