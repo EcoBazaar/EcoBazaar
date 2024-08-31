@@ -32,6 +32,7 @@ class AddressSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
     address = AddressSerializer(read_only=True)
     products = ProductSerializer(many=True, read_only=True, source="user.product_set")
+
     class Meta:
         model = Customer
         fields = "__all__"
@@ -42,7 +43,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         user = instance.user
         if user.first_name and user.last_name:
             representation["full_name"] = f"{user.first_name} {user.last_name}"
-        
+
         representation["username"] = user.username
 
         return representation    
@@ -51,6 +52,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 class SellerSerializer(serializers.ModelSerializer):
     address = AddressSerializer(read_only=True)
     products = ProductSerializer(many=True, read_only=True, source="user.product_set")
+
     class Meta:
         model = Seller
         fields = "__all__"
@@ -61,7 +63,7 @@ class SellerSerializer(serializers.ModelSerializer):
         user = instance.user
         if user.first_name and user.last_name:
             representation["full_name"] = f"{user.first_name} {user.last_name}"
-        
+
         representation["username"] = user.username
 
         return representation
@@ -69,12 +71,15 @@ class SellerSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True) 
+
     class Meta:
         model = OrderItem
         fields = "__all__"    
 
+
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True, read_only=True)
+
     class Meta:
         model = Order
         fields = "__all__"
@@ -82,23 +87,21 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True) 
+
     class Meta:
         model = CartItem
         fields = "__all__"
 
+
 class CartSerializer(serializers.ModelSerializer):
     cart_items = CartItemSerializer(many=True, read_only=True)
+
     class Meta:
         model = Cart
         fields = "__all__"
-
-
-
 
 
 class SellerUsernameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
         fields = ["user", "products"]
-
-
