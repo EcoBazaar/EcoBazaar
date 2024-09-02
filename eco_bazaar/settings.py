@@ -1,3 +1,8 @@
+# Import Cloudinary
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 
 from pathlib import Path
 import os
@@ -21,6 +26,14 @@ DEBUG = os.getenv('DEBUG')
 ALLOWED_HOSTS = []
 
 
+# Cloudinary configuration
+cloudinary.config(
+    cloud_name='dshokvtnd',  
+    api_key='771883326174695',  
+    #api_secret='your-api-secret'   # Elnara could not generate it yet
+)
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -35,6 +48,8 @@ INSTALLED_APPS = [
     "django_filters",
     "shop",
     "profile",
+    'cloudinary',
+    'cloudinary_storage'
 ]
 
 REST_FRAMEWORK = {
