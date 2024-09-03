@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "django_filters",
     "shop",
     "profile",
+    "django_extensions",
 ]
 
 REST_FRAMEWORK = {
