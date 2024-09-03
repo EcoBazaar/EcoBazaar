@@ -19,7 +19,7 @@ class Address(models.Model):
         max_length=15,
         validators=[
             RegexValidator(
-                regex=r'^\+?1?\d{9,15}$',
+                regex=r"^\+?1?\d{9,15}$",
                 message=(
                     "Phone number must \
                         be entered in the format: '+999999999'."
@@ -96,8 +96,12 @@ class OrderItem(models.Model):
         Order, on_delete=models.CASCADE, related_name="order_items"
     )
     cart_item = models.OneToOneField(
-        'CartItem', on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='order_items')
+        "CartItem",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="order_items",
+    )
     quantity = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -117,11 +121,14 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart,
-                             on_delete=models.CASCADE,
-                             related_name="cart_items")
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE, related_name="cart_items"
+    )
     product = models.ForeignKey(
         "shop.Product", on_delete=models.CASCADE, related_name="cart_items"
+    )
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name="cart_items"
     )
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)

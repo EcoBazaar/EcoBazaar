@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 
 class Category(models.Model):
@@ -19,7 +20,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(null=True, blank=True)
     is_new = models.BooleanField(default=False)
-    stock = models.IntegerField(default=1)
+    stock = models.IntegerField(validators=[MinValueValidator(0)], default=1)
     seller = models.ForeignKey(
         "profile.Seller", related_name="seller", on_delete=models.CASCADE
     )

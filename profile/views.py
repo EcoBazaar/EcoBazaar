@@ -69,8 +69,8 @@ class RegisterView(APIView):
             if request.data.get("role") == "seller":
                 seller_serializer = SellerSerializer(
                     data={
-                        "user": user.id,
-                        "address": request.data.get("address")}
+                        "user": user.id, "address": request.data.get("address")
+                        }
                 )
 
                 if seller_serializer.is_valid():
@@ -84,8 +84,10 @@ class RegisterView(APIView):
 
             else:  # Default to customer if role is not 'seller'
                 customer_serializer = CustomerSerializer(
-                    data={"user": user.id,
-                          "address": request.data.get("address")}
+                    data={
+                        "user": user.id, "address":
+                        request.data.get("address")
+                    }
                 )
 
                 if customer_serializer.is_valid():
@@ -102,8 +104,9 @@ class RegisterView(APIView):
                 status=status.HTTP_201_CREATED
             )
 
-        return Response(user_serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            user_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class LoginView(APIView):
@@ -160,11 +163,10 @@ class CartDetail(generics.RetrieveUpdateDestroyAPIView):
     get_queryset method filters the cart based on the
     authenticated user
     """
+
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [IsOwnerOrAdmin]
-    print(50*'*')
-    print()
 
     def get_queryset(self):
         # Ensure that only the cart belonging to
@@ -216,16 +218,22 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
     """
 
     # TODO remove access of OWNER after testing
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsOwnerOrAdmin]  # TODO change to IsOwnerOrAdmin
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
 
     def get_queryset(self):
-        cart_id = self.kwargs.get("cart_id")
+        if self.request.user.is_anonymous:
+            raise serializers.ValidationError("User is not authenticated")
         item_id = self.kwargs.get("pk")
-        return CartItem.objects.filter(
-            cart__id=cart_id, cart__customer=self.request.user, pk=item_id
-        )
+        customer_id = self.kwargs.get("customer_id")
+        queryset = CartItem.objects.filter(
+            cart__customer__id=customer_id, pk=item_id
+            )
+
+        if not queryset.exists():
+            raise serializers.ValidationError("Cart item not found")
+        return queryset
 
     def update(self, request, *args, **kwargs):
         """
@@ -261,6 +269,7 @@ class OrderList(generics.ListCreateAPIView):
     create_order method creates the order and adds the items
     from the cart to the order and deletes the cart items
     """
+
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     # TODO remove access of OWNER after testing
@@ -328,8 +337,9 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
         cart = Cart.objects.get(customer=self.request.user)
         # Adding articles to the order
         for item in add_items:
-            cart_item = CartItem.objects.get(cart=cart,
-                                             id=item["cart_item_id"])
+            cart_item = CartItem.objects.get(
+                cart=cart, id=item["cart_item_id"]
+            )
             OrderItem.objects.create(
                 order=order,
                 product=cart_item.product,
@@ -342,5 +352,6 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
             order_item = OrderItem.objects.get(order=order, id=item_id)
             order_item.delete()
 
-        return Response(self.get_serializer(order).data,
-                        status=status.HTTP_200_OK)
+        return Response(
+            self.get_serializer(order).data, status=status.HTTP_200_OK
+        )
