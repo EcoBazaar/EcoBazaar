@@ -30,8 +30,8 @@ ALLOWED_HOSTS = []
 cloudinary.config(
     cloud_name=os.getenv('CLOUD_NAME'),  
     api_key=os.getenv('API_KEY'),
-    #api_secret='your-api-secret'   # Elnara could not generate it yet
-)
+    api_secret=os.getenv('API_SECRET')
+    )
 
 
 # Application definition
