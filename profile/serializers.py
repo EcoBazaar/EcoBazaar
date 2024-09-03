@@ -89,7 +89,9 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all()
+    )
 
     class Meta:
         model = CartItem
@@ -102,7 +104,9 @@ class CartItemSerializer(serializers.ModelSerializer):
 
         # Ensure the product stock is sufficient
         if product.stock < quantity:
-            raise serializers.ValidationError({"message": "Product out of stock."})
+            raise serializers.ValidationError(
+                {"message": "Product out of stock."}
+            )
 
         # Create or update the CartItem
         cart_item, created = CartItem.objects.get_or_create(
@@ -114,7 +118,9 @@ class CartItemSerializer(serializers.ModelSerializer):
         if not created:
             cart_item.quantity += quantity
             if cart_item.quantity > product.stock:
-                raise serializers.ValidationError({"message": "Product out of stock."})
+                raise serializers.ValidationError(
+                    {"message": "Product out of stock."}
+                )
             cart_item.save()
 
         # Update the product stock
@@ -122,6 +128,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         product.save()
 
         return cart_item
+
 
 class CartSerializer(serializers.ModelSerializer):
     cart_items = CartItemSerializer(many=True, read_only=True)

@@ -198,7 +198,6 @@ class CartItemList(generics.ListCreateAPIView):
         serializer.save(cart=cart)
 
 
-
 class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     CartItemDetail view only authenticated customer of the cart can
