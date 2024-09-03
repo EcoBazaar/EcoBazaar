@@ -239,17 +239,39 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
         """
         method to update the quantity of the product in the cart"""
         instance = self.get_object()
-        quantity = request.data.get("quantity", None)
+        new_quantity = request.data.get("quantity", None)
 
-        if quantity >= 1:
-            instance.quantity = quantity
-            instance.product.stock -= instance.quantity
+        if new_quantity is None or new_quantity < 0:
+            raise serializers.ValidationError(
+                {"message": "Quantity must be greater than 0"}
+            )
+
+        current_quantity = instance.quantity
+
+        if new_quantity > current_quantity:
+            increase_amount = new_quantity - current_quantity
+            if instance.product.stock >= increase_amount:
+                instance.product.stock -= increase_amount
+                instance.quantity = new_quantity
+                instance.product.save()
+            else:
+                return Response(
+                    {"message": "Product out of stock"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        elif new_quantity < current_quantity:
+            decrease_amount = current_quantity - new_quantity
+            instance.product.stock += decrease_amount
+            instance.quantity = new_quantity
             instance.product.save()
-            # TODO CHECK WITH A TEST IF THE INSTANCE IS SAVED
-            instance.save()
-            serialaizer = self.get_serializer(instance)
-            return Response(serialaizer.data, status=status.HTTP_200_OK)
-        return self.destroy(request, *args, **kwargs)
+        elif new_quantity == 0:
+            instance.product.stock += current_quantity
+            instance.quantity = new_quantity
+            instance.product.save()
+            return super().destroy(request, *args, **kwargs)
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         """
