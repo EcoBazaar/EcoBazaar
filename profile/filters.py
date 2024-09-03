@@ -5,7 +5,7 @@ from django_filters.rest_framework import FilterSet
 
 class SellerFilter(FilterSet):
     city = filters.CharFilter(
-        field_name="address_city",
+        field_name="address__city",
         lookup_expr="icontains")
 
     class Meta:
