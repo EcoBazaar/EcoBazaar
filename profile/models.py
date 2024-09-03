@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from shop.models import Product
 from django.core.validators import RegexValidator
 
 
@@ -11,7 +10,8 @@ class Address(models.Model):
         validators=[
             RegexValidator(
                 regex=r'^[0-9]{5}(?:-[0-9]{4})?$',
-                message="Enter a valid postal code. Format: '12345' or '12345-6789'."
+                message="Enter a valid postal code\
+                    . Format: '12345' or '12345-6789'."
             ),
         ],
     )
@@ -21,7 +21,8 @@ class Address(models.Model):
             RegexValidator(
                 regex=r'^\+?1?\d{9,15}$',
                 message=(
-                    "Phone number must be entered in the format: '+999999999'."
+                    "Phone number must \
+                        be entered in the format: '+999999999'."
                     " Up to 15 digits allowed."
                 ),
             ),
@@ -70,7 +71,8 @@ class Order(models.Model):
         Customer, on_delete=models.CASCADE, related_name="customer"
     )
     cart = models.ForeignKey(
-        "Cart", on_delete=models.SET_NULL, related_name="order", null=True, blank=True
+        "Cart", on_delete=models.SET_NULL,
+        related_name="order", null=True, blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     shipping_address = models.ForeignKey(
@@ -93,7 +95,9 @@ class OrderItem(models.Model):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name="order_items"
     )
-    cart_item = models.OneToOneField('CartItem', on_delete=models.SET_NULL, null=True, blank=True, related_name='order_items')
+    cart_item = models.OneToOneField(
+        'CartItem', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='order_items')
     quantity = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 

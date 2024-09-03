@@ -1,6 +1,5 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
 from rest_framework import generics, permissions, serializers
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
@@ -9,7 +8,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from profile.models import Customer, Seller, Order, OrderItem, Cart, CartItem
-from profile.permission import IsOwnerOrAdmin, IsOwner
+from profile.permission import IsOwnerOrAdmin
 from profile.serializers import (
     CustomerSerializer,
     SellerSerializer,
@@ -166,52 +165,12 @@ class CartDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsOwnerOrAdmin]
     print(50*'*')
     print()
+
     def get_queryset(self):
-        # Ensure that only the cart belonging to the authenticated user is accessed.
+        # Ensure that only the cart belonging to
+        # the authenticated user is accessed.
         return Cart.objects.filter(customer=self.request.user.customer)
 
-# class CartView(mixins.ListModelMixin,
-#                mixins.CreateModelMixin,
-#                mixins.RetrieveModelMixin,
-#                mixins.UpdateModelMixin,
-#                mixins.DestroyModelMixin,
-#                generics.GenericAPIView):
-#     """
-#     CartView handles all operations (list, create, retrieve, update, delete)
-#     for Cart objects. Only authenticated users can access or modify their cart,
-#     or a superuser can access any cart.
-#     """
-
-#     queryset = Cart.objects.all()
-#     serializer_class = CartSerializer
-#     permission_classes = [IsOwnerOrAdmin]
-
-#     def get_queryset(self):
-#         # Ensure that only the cart belonging to the authenticated user is accessed.
-#         return Cart.objects.filter(customer=self.request.user)
-
-#     def perform_create(self, serializer):
-#         # Save the cart with the authenticated user as the customer.
-#         serializer.save(customer=self.request.user)
-
-#     def get(self, request, *args, **kwargs):
-#         if 'pk' in kwargs:
-#             # If 'pk' is present in kwargs, it means it's a detail request.
-#             return self.retrieve(request, *args, **kwargs)
-#         # Otherwise, it's a list request.
-#         return self.list(request, *args, **kwargs)
-
-#     def post(self, request, *args, **kwargs):
-#         # Handle the create operation.
-#         return self.create(request, *args, **kwargs)
-
-#     def put(self, request, *args, **kwargs):
-#         # Handle the update operation.
-#         return self.update(request, *args, **kwargs)
-
-#     def delete(self, request, *args, **kwargs):
-#         # Handle the delete operation.
-#         return self.destroy(request, *args, **kwargs)
 
 class CartItemList(generics.ListCreateAPIView):
     """
@@ -307,7 +266,6 @@ class OrderList(generics.ListCreateAPIView):
     # TODO remove access of OWNER after testing
     permission_classes = [IsOwnerOrAdmin]
 
-
     def create(self, request, *args, **kwargs):
         # Create the order for the authenticated user
         customer = request.user
@@ -330,7 +288,7 @@ class OrderList(generics.ListCreateAPIView):
                 quantity=item.quantity,
                 shipping_address=customer.address,
             )
-        
+
         cart_items.delete()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
