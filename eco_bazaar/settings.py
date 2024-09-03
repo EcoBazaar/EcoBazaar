@@ -28,8 +28,8 @@ ALLOWED_HOSTS = []
 
 # Cloudinary configuration
 cloudinary.config(
-    cloud_name='dshokvtnd',  
-    api_key='771883326174695',  
+    cloud_name=os.getenv('CLOUD_NAME'),  
+    api_key=os.getenv('API_KEY'),
     #api_secret='your-api-secret'   # Elnara could not generate it yet
 )
 
