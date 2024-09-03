@@ -27,5 +27,5 @@ urlpatterns = [
     path('customer/<int:customer_id>/order/<int:cart_id>/',
          OrderList.as_view(), name='order'),
     path('customer/<int:customer_id>/order/<int:cart_id>/<int:pk>/',
-         OrderDetail.as_view(), name='order-detail'),     
+         OrderDetail.as_view(), name='order-detail'),
 ]
