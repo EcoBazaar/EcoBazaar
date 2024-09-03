@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
+from shop.models import Product
 from shop.serializers import ProductSerializer
 from .models import Address, Customer, Seller, Order, OrderItem, Cart, CartItem
 
@@ -88,12 +89,39 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
 
     class Meta:
         model = CartItem
         fields = "__all__"
 
+    def create(self, validated_data):
+        product = validated_data.get('product')
+        quantity = validated_data.get('quantity')
+        cart = validated_data.get('cart')
+
+        # Ensure the product stock is sufficient
+        if product.stock < quantity:
+            raise serializers.ValidationError({"message": "Product out of stock."})
+
+        # Create or update the CartItem
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            defaults={'quantity': quantity}
+        )
+
+        if not created:
+            cart_item.quantity += quantity
+            if cart_item.quantity > product.stock:
+                raise serializers.ValidationError({"message": "Product out of stock."})
+            cart_item.save()
+
+        # Update the product stock
+        product.stock -= quantity
+        product.save()
+
+        return cart_item
 
 class CartSerializer(serializers.ModelSerializer):
     cart_items = CartItemSerializer(many=True, read_only=True)

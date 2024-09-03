@@ -127,9 +127,6 @@ class CartItem(models.Model):
     product = models.ForeignKey(
         "shop.Product", on_delete=models.CASCADE, related_name="cart_items"
     )
-    customer = models.ForeignKey(
-        Customer, on_delete=models.CASCADE, related_name="cart_items"
-    )
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -189,25 +189,14 @@ class CartItemList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     def get_queryset(self):
-        cart_id = self.kwargs.get("cart_id")
         return CartItem.objects.filter(
-            cart__id=cart_id, cart__customer=self.request.user
+            cart__customer=self.request.user.customer
         )
 
-    def add_product_in_cart(self, serializer):
-        cartlist = CartList()
-        cartlist.save_user_cart()  # TODO we need to test it
-        cart_id = self.kwargs.get("cart_id")
-        cart = Cart.objects.get(id=cart_id)
-        product = serializer.validated_data["product"]
-        quantity = serializer.validated_data["quantity"]
+    def product_in_cart(self, serializer):
+        cart = Cart.objects.get(customer=self.request.user.customer)
+        serializer.save(cart=cart)
 
-        if product.stock < quantity:
-            raise serializers.ValidationError(
-                {"message": "Product out of stock"})
-        else:
-            product.stock -= cart.quantity
-            product.save()
 
 
 class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
