@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Product Images{% endblock %}
+
+{% block content %}
+<div class="image-container">
+    {% for image in images %}
+    <div class="image-card">
+        <img src="{{ image.image_url }}" alt="Product Image">
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

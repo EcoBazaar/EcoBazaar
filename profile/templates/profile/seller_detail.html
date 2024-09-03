@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Seller Detail{% endblock %}
+
+{% block content %}
+<h2>Seller Detail</h2>
+<p><strong>Username:</strong> {{ seller.user.username }}</p>
+<p><strong>Email:</strong> {{ seller.user.email }}</p>
+<p><strong>Address:</strong> {{ seller.address }}</p>
+<a href="{% url 'sellers' %}">Back to Seller List</a>
+{% endblock %}

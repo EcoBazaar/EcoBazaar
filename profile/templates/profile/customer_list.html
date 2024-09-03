@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer List{% endblock %}
+
+{% block content %}
+<h2>Customer List</h2>
+<ul>
+    {% for customer in customers %}
+    <li>
+        <a href="{% url 'customer-detail' customer.id %}">
+            {{ customer.user.username }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

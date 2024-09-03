@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Cart Detail{% endblock %}
+
+{% block content %}
+<h2>Cart Detail</h2>
+<ul>
+    {% for item in cart_items %}
+    <li>
+        {{ item.product.name }} - Quantity: {{ item.quantity }}
+    </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'carts' customer.id %}">Back to Cart List</a>
+{% endblock %}

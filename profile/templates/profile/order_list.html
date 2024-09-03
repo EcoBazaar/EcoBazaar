@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Order List{% endblock %}
+
+{% block content %}
+<h2>Order List for {{ customer.user.username }}</h2>
+<ul>
+    {% for order in orders %}
+    <li>
+        <a href="{% url 'order-detail' customer.id order.cart.id order.id %}">
+            Order ID: {{ order.id }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'customers' %}">Back to Customer List</a>
+{% endblock %}
