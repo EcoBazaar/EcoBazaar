@@ -4,7 +4,7 @@ from shop.views import (
     ProductDetail,
     CategoryList,
     CategoryDetail,
-    ProductImageList,
+    ProductImageList,  # Handles listing and uploading product images
     ProductImageDetail,
     ProductSearchView,
 )

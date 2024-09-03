@@ -36,7 +36,8 @@ class ProductImage(models.Model):
     product = models.ForeignKey(
         Product, related_name="product_images", on_delete=models.CASCADE
     )
-    image = models.URLField()
-
+    #image = models.URLField()
+    image_url = models.URLField(max_length=200)  # Cloudinary image URL
+    
     def __str__(self):
         return self.product.name
