@@ -1,12 +1,10 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins
-from rest_framework import generics, permissions, serializers
-from django.contrib.auth import authenticate
-from rest_framework.authtoken.models import Token
-from rest_framework import status
+from rest_framework import generics, mixins, permissions, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+
 
 from profile.models import Customer, Seller, Order, OrderItem, Cart, CartItem
 from profile.permission import IsOwnerOrAdmin, IsOwner
@@ -18,10 +16,12 @@ from profile.serializers import (
     OrderSerializer,
     UserSerializer,
     SellerUsernameSerializer,
+    AddressSerializer, 
 )
 
 from django_filters.rest_framework import DjangoFilterBackend
 from profile.filters import SellerFilter
+
 
 
 class CustomerListCreateView(generics.ListCreateAPIView):
@@ -419,7 +419,7 @@ from profile.serializers import (
     CartSerializer,
     OrderSerializer,
     OrderItemSerializer,
-    AddressSeriaizer,
+    AddressSerializer,
     UserSerializer,
     SellerUsernameSerializer,
 )

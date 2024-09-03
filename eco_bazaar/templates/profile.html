@@ -1,0 +1,12 @@
+<!-- templates/profile.html -->
+{% extends 'base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+    <section class="profile">
+        <h1>Welcome, {{ user.username }}!</h1>
+        <p>Email: {{ user.email }}</p>
+        <p>Joined: {{ user.date_joined }}</p>
+    </section>
+{% endblock %}

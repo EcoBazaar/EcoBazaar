@@ -1,0 +1,21 @@
+<!-- templates/shop.html -->
+{% extends 'base.html' %}
+
+{% block title %}Shop{% endblock %}
+
+{% block content %}
+    <section class="shop">
+        <h1>Our Products</h1>
+        <ul class="product-list">
+            {% for product in products %}
+                <li class="product-item">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    <h2>{{ product.name }}</h2>
+                    <p>{{ product.description }}</p>
+                    <p>${{ product.price }}</p>
+                    <a href="{% url 'product_detail' product.id %}" class="btn">View Details</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+{% endblock %}
