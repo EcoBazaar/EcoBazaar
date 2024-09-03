@@ -9,9 +9,9 @@ class Address(models.Model):
         max_length=10,  # Set the max length as per your requirement
         validators=[
             RegexValidator(
-                regex=r"^[0-9]{5}(?:-[0-9]{4})?$",
-                message="Enter a valid postal code. Format:"
-                        "'12345' or '12345-6789'.",
+                regex=r'^[0-9]{5}(?:-[0-9]{4})?$',
+                message="Enter a valid postal code\
+                    . Format: '12345' or '12345-6789'."
             ),
         ],
     )
@@ -21,7 +21,8 @@ class Address(models.Model):
             RegexValidator(
                 regex=r"^\+?1?\d{9,15}$",
                 message=(
-                    "Phone number must be entered in the format: '+999999999'."
+                    "Phone number must \
+                        be entered in the format: '+999999999'."
                     " Up to 15 digits allowed."
                 ),
             ),

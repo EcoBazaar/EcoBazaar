@@ -1,3 +1,4 @@
+import cloudinary.uploader
 from shop.models import Product, Category, ProductImage
 from shop.serializers import (
     ProductSerializer,
@@ -60,6 +61,9 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CategorySerializer
 
 
+# ProductImageList
+
+
 class ProductImageList(generics.ListCreateAPIView):
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
@@ -74,7 +78,37 @@ class ProductImageList(generics.ListCreateAPIView):
                 {"message": "You need to login to create a product image"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        return self.create(request, *args, **kwargs)
+        # return self.create(request, *args, **kwargs)
+
+        # Get the image file from the request
+        file = request.FILES.get('image')
+
+        if file:
+            # Upload the image to Cloudinary
+            upload_result = cloudinary.uploader.upload(file)
+            image_url = upload_result.get('url')
+
+            # Create a new ProductImage instance with the uploaded URL
+            data = {
+                'product': request.data.get('product'),
+                'image_url': image_url
+            }
+
+            serializer = self.get_serializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED
+                )
+            else:
+                return Response(
+                    serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            return Response(
+                {"message": "No image file provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class ProductImageDetail(generics.RetrieveUpdateDestroyAPIView):
