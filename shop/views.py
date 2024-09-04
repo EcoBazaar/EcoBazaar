@@ -33,7 +33,7 @@ class ProductList(generics.ListCreateAPIView):
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
-        permissions.IsAdminUser,
+        #permissions.IsAdminUser,
     ]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -54,7 +54,6 @@ class CategoryList(generics.ListCreateAPIView):
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
         permissions.IsAdminUser,
     ]
     queryset = Category.objects.all()
