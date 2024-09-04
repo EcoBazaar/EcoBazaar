@@ -101,7 +101,7 @@ WSGI_APPLICATION = "eco_bazaar.wsgi.application"
 env = environ.Env()
 environ.Env.read_env()
 # Check if the app is running inside Docker
-if os.getenv('DOCKERIZED', 'false').lower():
+if os.getenv('DOCKERIZED', 'false').lower() == 'true':
     # In Docker environment
     DATABASES = {
         'default': env.db()
