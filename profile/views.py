@@ -30,7 +30,7 @@ class CustomerListCreateView(generics.ListCreateAPIView):
 
 
 class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsOwnerOrAdmin] # TODO 
+    permission_classes = [IsOwnerOrAdmin]
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
