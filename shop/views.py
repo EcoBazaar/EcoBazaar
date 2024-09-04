@@ -54,7 +54,6 @@ class CategoryList(generics.ListCreateAPIView):
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
         permissions.IsAdminUser,
     ]
     queryset = Category.objects.all()
