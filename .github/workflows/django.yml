@@ -45,9 +45,9 @@ jobs:
       run: |
         python manage.py migrate  
 
-    # - name: Run Tests # TODO when write test
-    #   run: |
-    #     python manage.py test
+    - name: Run Tests
+      run: |
+        python manage.py test
 
     - name: check flake8
       run: |
