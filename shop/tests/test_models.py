@@ -9,7 +9,6 @@ from profile.models import Seller
 class ProductAPITest(APITestCase):
 
     def setUp(self):
-        #
         self.superuser = User.objects.create_superuser(
             username="admin", password="adminpass"
         )
@@ -27,13 +26,13 @@ class ProductAPITest(APITestCase):
             category=self.category,
         )
 
-    def test_list_products(self):  # OKAY
+    def test_list_products(self):
         url = reverse("products")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
-    def test_create_product_as_superuser(self):  # OKAYYY #####
+    def test_create_product_as_superuser(self):
         self.client.force_authenticate(user=self.superuser)
         url = reverse("products")
         data = {
@@ -50,7 +49,7 @@ class ProductAPITest(APITestCase):
             Product.objects.get(id=response.data["id"]).name, "New Product"
         )
 
-    def test_create_product_as_regular_user(self):  # OKAY
+    def test_create_product_as_regular_user(self):
         url = reverse("products")
         data = {
             "name": "New Product",
@@ -62,27 +61,23 @@ class ProductAPITest(APITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # OKAY Continue checking with Saeideh
+    
     def test_retrieve_product_as_authenticated_user(self):
-        # Log in as the admin user
         self.client.force_authenticate(user=self.superuser)
         self.client.force_authenticate(
-            user=self.regular_user)  # Check with Saeideh
+            user=self.regular_user)
 
-        # Access the product detail endpoint
         url = reverse("product-detail", args=[self.product.id])
         response = self.client.get(url)
 
-        # Print debug information
         print(f"Response status code: {response.status_code}")
         print(f"Response data: {response.data}")
 
-        # Check the status code and response data
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], "Test Product")
         self.assertEqual(float(response.data["price"]), 99.99)
 
-    def test_update_product_as_superuser(self):  # OKAY
+    def test_update_product_as_superuser(self):
         self.client.force_authenticate(user=self.superuser)
         url = reverse("product-detail", args=[self.product.id])
         data = {
@@ -92,10 +87,7 @@ class ProductAPITest(APITestCase):
             "seller": self.seller.id,
             "category_id": self.category.id,
         }
-        # Send the PUT request
         response = self.client.put(url, data, format="json")
-
-        # Print response for debugging
         print("Response status code:", response.status_code)
         print("Response data:", response.data)
 
@@ -103,13 +95,13 @@ class ProductAPITest(APITestCase):
         self.product.refresh_from_db()
         self.assertEqual(self.product.name, "Updated Product Name")
 
-    def test_delete_product_as_superuser(self):  # OKAY
+    def test_delete_product_as_superuser(self):
         self.client.force_authenticate(user=self.superuser)
         url = reverse("product-detail", args=[self.product.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_search_product_by_name(self):  # OKAY
+    def test_search_product_by_name(self):
         url = reverse("search")
         response = self.client.get(url, {"search": "Test Product"})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
