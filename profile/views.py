@@ -8,7 +8,11 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from profile.models import Customer, Seller, Order, OrderItem, Cart, CartItem
-from profile.permission import IsOwnerOrAdmin
+from profile.permission import (
+    IsOwnerOrAdmin,
+    IsCustomerOrAdminForRelatedObjects,
+    IsSellerOrAdmin
+    )
 from profile.serializers import (
     CustomerSerializer,
     SellerSerializer,
@@ -30,7 +34,7 @@ class CustomerListCreateView(generics.ListCreateAPIView):
 
 
 class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsOwnerOrAdmin and Customer]
+    permission_classes = [IsOwnerOrAdmin]
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
@@ -44,7 +48,7 @@ class SellerList(generics.ListAPIView):
 
 
 class SellerDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsSellerOrAdmin]
     queryset = Seller.objects.all()
 
     def get_serializer_class(self):
@@ -147,7 +151,7 @@ class CartList(generics.ListCreateAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     # TODO remove access of OWNER after testing
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
 
     def get_queryset(self):
         return Cart.objects.filter(customer=self.request.user.customer)
@@ -166,7 +170,7 @@ class CartDetail(generics.RetrieveUpdateDestroyAPIView):
 
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
 
     def get_queryset(self):
         # Ensure that only the cart belonging to
@@ -186,7 +190,7 @@ class CartItemList(generics.ListCreateAPIView):
 
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
 
     def get_queryset(self):
         return CartItem.objects.filter(
