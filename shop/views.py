@@ -33,8 +33,7 @@ class ProductList(generics.ListCreateAPIView):
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
-        #permissions.IsAdminUser,
-    ]
+       ]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
