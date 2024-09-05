@@ -41,7 +41,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ["user", "address","products", "address_details"]
+        fields = ["user", "address", "products", "address_details"]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
