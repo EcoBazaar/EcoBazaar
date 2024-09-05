@@ -244,3 +244,12 @@ After importing, you can run the predefined requests to interact with the API. E
 ---
 
 This README provides a comprehensive guide to setting up and running the EcoBazaar project, including how to register and log in as a user, and interact with the API endpoints. Adjust any specific URLs or paths according to your actual project setup.
+
+## Seeding the Database
+
+To seed the database with dummy customers, sellers, and products, run the following command:
+
+```
+python manage.py seed_data
+```
+

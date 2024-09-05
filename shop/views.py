@@ -33,7 +33,6 @@ class ProductList(generics.ListCreateAPIView):
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
-        permissions.IsAdminUser,
     ]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -54,14 +53,10 @@ class CategoryList(generics.ListCreateAPIView):
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
         permissions.IsAdminUser,
     ]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-
-
-# ProductImageList
 
 
 class ProductImageList(generics.ListCreateAPIView):
@@ -78,17 +73,13 @@ class ProductImageList(generics.ListCreateAPIView):
                 {"message": "You need to login to create a product image"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        # return self.create(request, *args, **kwargs)
 
-        # Get the image file from the request
         file = request.FILES.get('image')
 
         if file:
-            # Upload the image to Cloudinary
             upload_result = cloudinary.uploader.upload(file)
             image_url = upload_result.get('url')
 
-            # Create a new ProductImage instance with the uploaded URL
             data = {
                 'product': request.data.get('product'),
                 'image_url': image_url
@@ -124,5 +115,4 @@ class ProductSearchView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [filters.SearchFilter]
-    # Adjust fields as necessary
     search_fields = ["name", "description", "category__name"]

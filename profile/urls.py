@@ -11,21 +11,38 @@ from profile.views import (
     OrderDetail,
     CartList,
 )
+
 urlpatterns = [
-    path('customers/', CustomerListCreateView.as_view(), name='customers'),
-    path('customer/<int:pk>/',
-         CustomerDetail.as_view(), name='customer-detail'),
-    path('sellers/', SellerList.as_view(), name='sellers'),
-    path('seller/<int:pk>/', SellerDetail.as_view(), name='seller-detail'),
-    path('customer/<int:customer_id>/cart/', CartList.as_view(), name='carts'),
-    path('customer/<int:customer_id>/cart/<int:pk>/',
-         CartDetail.as_view(), name='carts-detail'),
-    path('customer/<int:customer_id>/cart-items/',
-         CartItemList.as_view(), name='cart'),
-    path('customer/<int:customer_id>/cart-item/<int:pk>/',
-         CartItemDetail.as_view(), name='cart-detail'),
-    path('customer/<int:customer_id>/order/<int:cart_id>/',
-         OrderList.as_view(), name='order'),
-    path('customer/<int:customer_id>/order/<int:cart_id>/<int:pk>/',
-         OrderDetail.as_view(), name='order-detail'),
+    path(
+        "customers/",
+        CustomerListCreateView.as_view(), name="customers"),
+    path(
+        "customer/<int:pk>/",
+        CustomerDetail.as_view(), name="customer-detail"),
+    path("sellers/", SellerList.as_view(), name="sellers"),
+    path("seller/<int:pk>/", SellerDetail.as_view(), name="seller-detail"),
+    path("customer/<int:customer_id>/cart/", CartList.as_view(), name="carts"),
+    path(
+        "customer/<int:customer_id>/cart/<int:pk>/",
+        CartDetail.as_view(),
+        name="carts-detail",
+    ),
+    path(
+        "customer/<int:customer_id>/cart-items/",
+        CartItemList.as_view(), name="cart"),
+    path(
+        "customer/<int:customer_id>/cart-item/<int:pk>/",
+        CartItemDetail.as_view(),
+        name="cart-detail",
+    ),
+    path(
+        "customer/<int:customer_id>/order/<int:cart_id>/",
+        OrderList.as_view(),
+        name="order",
+    ),
+    path(
+        "customer/<int:customer_id>/order/<int:cart_id>/<int:pk>/",
+        OrderDetail.as_view(),
+        name="order-detail",
+    ),
 ]
