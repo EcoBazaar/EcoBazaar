@@ -45,9 +45,11 @@ jobs:
       run: |
         python manage.py migrate  
 
-    # - name: Run Tests # TODO when write test
-    #   run: |
-    #     python manage.py test
+    - name: Run Tests
+      env:
+        SECRET_KEY: ${{secrets.SECRET_KEY}}
+      run: |
+        python manage.py test
 
     - name: check flake8
       run: |

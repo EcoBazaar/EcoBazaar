@@ -24,13 +24,13 @@ from profile.filters import SellerFilter
 
 
 class CustomerListCreateView(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
+    permission_classes = [IsOwnerOrAdmin]
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
 
 class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsOwnerOrAdmin and Customer]
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
