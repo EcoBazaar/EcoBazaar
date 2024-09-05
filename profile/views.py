@@ -24,7 +24,7 @@ from profile.filters import SellerFilter
 
 
 class CustomerListCreateView(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
+    permission_classes = [IsOwnerOrAdmin]
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
