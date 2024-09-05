@@ -7,6 +7,8 @@ import cloudinary.api
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import environ
+
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
 
@@ -23,7 +25,7 @@ SECRET_KEY =os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Cloudinary configuration
@@ -96,16 +98,26 @@ WSGI_APPLICATION = "eco_bazaar.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB'),
-        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': os.environ.get('POSTGRES_HOST','localhost'),
-        'PORT': os.environ.get('POSTGRES_PORT','5432'),
+env = environ.Env()
+environ.Env.read_env()
+# Check if the app is running inside Docker
+if os.getenv('DOCKERIZED', 'false').lower() == 'true':
+    # In Docker environment
+    DATABASES = {
+        'default': env.db()
     }
-}
+
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB'),
+            'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
+            'HOST': os.environ.get('POSTGRES_HOST','localhost'),
+            'PORT': os.environ.get('POSTGRES_PORT','5432'),
+        }
+    }
 
 
 # Password validation
