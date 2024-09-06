@@ -255,11 +255,12 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
             instance.product.stock += decrease_amount
             instance.quantity = new_quantity
             instance.product.save()
-        elif new_quantity == 0:
+
+        if new_quantity == 0:
             instance.product.stock += current_quantity
-            instance.quantity = new_quantity
             instance.product.save()
-            return super().destroy(request, *args, **kwargs)
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         instance.save()
         serializer = self.get_serializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
