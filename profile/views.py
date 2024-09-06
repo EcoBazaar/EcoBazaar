@@ -210,7 +210,7 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
     """
 
     # TODO remove access of OWNER after testing
-    permission_classes = [IsOwnerOrAdmin]  # TODO change to IsOwnerOrAdmin
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]  # TODO change to IsOwnerOrAdmin
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
 
@@ -287,11 +287,11 @@ class OrderList(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     # TODO remove access of OWNER after testing
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
 
     def create(self, request, *args, **kwargs):
         # Create the order for the authenticated user
-        customer = request.user
+        customer = request.user.customer
         cart = Cart.objects.get(customer=customer)
 
         cart_items = CartItem.objects.filter(cart=cart)
@@ -307,9 +307,8 @@ class OrderList(generics.ListCreateAPIView):
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
-                product=item.product,
+                cart_item = item,
                 quantity=item.quantity,
-                shipping_address=customer.address,
             )
 
         cart_items.delete()
@@ -325,12 +324,12 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
     """
 
     # TODO remove access of OWNER after testing
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        return Order.objects.filter(customer=self.request.user)
+        return Order.objects.filter(customer=self.request.user.customer)
 
     def choose_address(self, request, *args, **kwargs):
         order = self.get_object()
@@ -356,7 +355,7 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
             )
             OrderItem.objects.create(
                 order=order,
-                product=cart_item.product,
+                cart_item=cart_item,
                 quantity=cart_item.quantity,
                 shipping_address=self.choose_address(request, *args, **kwargs),
             )

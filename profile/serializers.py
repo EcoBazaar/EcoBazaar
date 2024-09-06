@@ -93,7 +93,13 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = "__all__"
+        fields = ["order_items", "customer", "cart",
+                  "created_at", "shipping_address"]
+        read_only_fields = ["id", "customer", "order_items"]
+
+    def create(self, validated_data):
+
+        return Order.objects.create(**validated_data)
 
 
 class CartItemSerializer(serializers.ModelSerializer):
