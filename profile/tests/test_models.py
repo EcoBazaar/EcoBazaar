@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from profile.models import (
     Customer, Seller, Address, Cart, Order, OrderItem, CartItem)
-from shop.models import Product, Category, ProductImage
+from shop.models import Product, Category
 from django.contrib.auth.models import User
 
 
@@ -304,20 +304,29 @@ class OrderTests(APITestCase):
         self.customer = Customer.objects.create(
             user=self.user_customer, address=self.address)
         self.cart = Cart.objects.create(customer=self.customer)
-        self.order = Order.objects.create(cart=self.cart, customer=self.customer)
+        self.order = Order.objects.create(
+            cart=self.cart, customer=self.customer
+            )
         self.product = Product.objects.create(
             name="Test Product",
             description="Test Description",
             price=10.00,
-            seller=Seller.objects.create(user=self.user_seller, address=self.address),
+            seller=Seller.objects.create(
+                user=self.user_seller, address=self.address
+            ),
             stock=10,
             category=Category.objects.create(name="Test Category"),
         )
         self.cart_item = CartItem.objects.create(
-            cart=self.cart, product=self.product, quantity=2)
-        self.order_url = reverse("order", args=[self.customer.pk, self.cart.pk])
+            cart=self.cart, product=self.product, quantity=2
+            )
+        self.order_url = reverse(
+            "order", args=[self.customer.pk, self.cart.pk]
+        )
         self.order_detail_url = reverse(
-            "order-detail", args=[self.customer.pk, self.cart.pk, self.order.pk]
+            "order-detail", args=[
+                self.customer.pk, self.cart.pk, self.order.pk
+                ]
         )
 
     def test_get_order_list(self):
@@ -330,24 +339,25 @@ class OrderTests(APITestCase):
     def test_create_order(self):
         Order.objects.filter(customer=self.customer).delete()
         self.client.force_authenticate(user=self.user_customer)
-        cart_items_count=CartItem.objects.filter(cart=self.cart).count()
+        cart_items_count = CartItem.objects.filter(cart=self.cart).count()
         self.assertEqual(cart_items_count, 1)
         respones = self.client.post(self.order_url, {}, format="json")
         # check if the order is created
         self.assertEqual(respones.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Order.objects.count(), 1)
-        # verify cart items were transferred to order 
+        # verify cart items were transferred to order
         order = Order.objects.first()
         order_item_count = OrderItem.objects.filter(order=order).count()
         self.assertEqual(order_item_count, 1)
         # verify the cart is empty
-        cart_items_count_after = CartItem.objects.filter(cart=self.cart).count()
+        cart_items_count_after = CartItem.objects.filter(
+            cart=self.cart).count()
         self.assertEqual(cart_items_count_after, 0)
         # verify data of order items
         order_item = OrderItem.objects.first()
         self.assertEqual(order_item.order, order)
         self.assertEqual(order_item.quantity, 2)
-    
+
     def test_retrieve_order_by_id(self):
         self.client.force_authenticate(user=self.user_customer)
         response = self.client.get(self.order_detail_url)
@@ -374,4 +384,3 @@ class OrderTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["shipping_address"], self.address.pk)
         self.assertEqual(response.data["customer"], self.customer.pk)
-
