@@ -209,8 +209,7 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
     the cart based on the authenticated user, cart id and item id
     """
 
-    # TODO remove access of OWNER after testing
-    permission_classes = [IsCustomerOrAdminForRelatedObjects]  # TODO change to IsOwnerOrAdmin
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
 
@@ -307,8 +306,8 @@ class OrderList(generics.ListCreateAPIView):
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
-                cart_item = item,
-                quantity=item.quantity,
+                cart_item=item,
+                quantity=item.quantity
             )
 
         cart_items.delete()
