@@ -188,7 +188,6 @@ class CartTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Cart.objects.count(), 1)
 
-
     def test_create_cart(self):
         Cart.objects.filter(customer=self.customer).delete()
         self.client.force_authenticate(user=self.user)
@@ -242,13 +241,15 @@ class CartItemTests(APITestCase):
         self.cart_item_detail_url = reverse(
             "cart-detail", args=[self.customer.pk, self.cart_item.pk]
         )
+
     def test_get_cart_item_list_anonymous_user(self):
         response = self.client.get(self.cart_item_detail_url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_cart_item_does_not_exist(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(reverse("cart-detail", args=[self.customer.pk, 999]))
+        response = self.client.get(
+            reverse("cart-detail", args=[self.customer.pk, 999]))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_cart_item_list(self):
@@ -298,15 +299,19 @@ class CartItemTests(APITestCase):
             "quantity": 100
         }
         response = self.client.put(
-            self.cart_item_detail_url, more_quantity_then_stock_data, format="json"
+            self.cart_item_detail_url,
+            more_quantity_then_stock_data,
+            format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST) 
-        less_quantity_data ={
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        less_quantity_data = {
             "cart": self.cart.pk,
             "product": self.product.pk,
             "quantity": 1
-        } 
-        response = self.client.put(self.cart_item_detail_url, less_quantity_data, format="json")
+        }
+        response = self.client.put(
+            self.cart_item_detail_url, less_quantity_data, format="json"
+            )
         self.assertEqual(response.data["quantity"], 1)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -315,7 +320,9 @@ class CartItemTests(APITestCase):
             "product": self.product.pk,
             "quantity": 0
         }
-        response = self.client.put(self.cart_item_detail_url, zero_quantity_data, format="json")
+        response = self.client.put(
+            self.cart_item_detail_url, zero_quantity_data, format="json"
+            )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(CartItem.objects.count(), 0)
 
@@ -330,6 +337,7 @@ class CartItemTests(APITestCase):
             self.cart_item_detail_url, data, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class OrderTests(APITestCase):
     def setUp(self):
