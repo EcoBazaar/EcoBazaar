@@ -69,10 +69,6 @@ class ProductAPITest(APITestCase):
 
         url = reverse("product-detail", args=[self.product.id])
         response = self.client.get(url)
-
-        print(f"Response status code: {response.status_code}")
-        print(f"Response data: {response.data}")
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], "Test Product")
         self.assertEqual(float(response.data["price"]), 99.99)
@@ -88,9 +84,6 @@ class ProductAPITest(APITestCase):
             "category_id": self.category.id,
         }
         response = self.client.put(url, data, format="json")
-        print("Response status code:", response.status_code)
-        print("Response data:", response.data)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.product.refresh_from_db()
         self.assertEqual(self.product.name, "Updated Product Name")
