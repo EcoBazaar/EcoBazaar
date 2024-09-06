@@ -6,6 +6,7 @@ from shop.serializers import (
     ProductImageSerializer,
 )
 from rest_framework import generics, filters
+from django.views.generic import ListView
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
@@ -116,3 +117,10 @@ class ProductSearchView(generics.ListAPIView):
     serializer_class = ProductSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["name", "description", "category__name"]
+
+
+# create demo views:
+class ProductListView(ListView):
+    model = Product
+    template_name = 'shop/product_list.html'  # replace with your actual template path
+    context_object_name = 'products'

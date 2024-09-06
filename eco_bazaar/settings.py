@@ -27,13 +27,14 @@ DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
-
-# Cloudinary configuration
+# Initialize Cloudinary
 cloudinary.config(
-    cloud_name=os.getenv('CLOUD_NAME'),  
-    api_key=os.getenv('API_KEY'),
-    api_secret=os.getenv('API_SECRET')
-    )
+    cloud_name = os.getenv('CLOUD_NAME'),
+    api_key = os.getenv('API_KEY'),
+    api_secret =  os.getenv('API_SECRET')
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # Application definition
@@ -98,8 +99,7 @@ WSGI_APPLICATION = "eco_bazaar.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-env = environ.Env()
-environ.Env.read_env()
+
 # Check if the app is running inside Docker
 if os.getenv('DOCKERIZED', 'false').lower() == 'true':
     # In Docker environment
