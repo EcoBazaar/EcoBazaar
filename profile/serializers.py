@@ -56,13 +56,17 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 
 class SellerSerializer(serializers.ModelSerializer):
-    address = AddressSerializer(read_only=True)
+    address = serializers.PrimaryKeyRelatedField(
+        queryset=Address.objects.all(),
+        write_only=True
+    )
+    address_details = AddressSerializer(read_only=True, source="address")
     products = ProductSerializer(
         many=True, read_only=True, source="user.product_set")
 
     class Meta:
         model = Seller
-        fields = "__all__"
+        fields = ["user", "address", "products", "address_details"]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -89,7 +93,13 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = "__all__"
+        fields = ["order_items", "customer", "cart",
+                  "created_at", "shipping_address"]
+        read_only_fields = ["id", "customer", "order_items"]
+
+    def create(self, validated_data):
+
+        return Order.objects.create(**validated_data)
 
 
 class CartItemSerializer(serializers.ModelSerializer):

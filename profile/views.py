@@ -8,7 +8,11 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from profile.models import Customer, Seller, Order, OrderItem, Cart, CartItem
-from profile.permission import IsOwnerOrAdmin
+from profile.permission import (
+    IsOwnerOrAdmin,
+    IsCustomerOrAdminForRelatedObjects,
+    IsSellerOrAdmin
+    )
 from profile.serializers import (
     CustomerSerializer,
     SellerSerializer,
@@ -30,7 +34,7 @@ class CustomerListCreateView(generics.ListCreateAPIView):
 
 
 class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsOwnerOrAdmin and Customer]
+    permission_classes = [IsOwnerOrAdmin]
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
@@ -44,7 +48,7 @@ class SellerList(generics.ListAPIView):
 
 
 class SellerDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsSellerOrAdmin]
     queryset = Seller.objects.all()
 
     def get_serializer_class(self):
@@ -147,7 +151,7 @@ class CartList(generics.ListCreateAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     # TODO remove access of OWNER after testing
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
 
     def get_queryset(self):
         return Cart.objects.filter(customer=self.request.user.customer)
@@ -166,7 +170,7 @@ class CartDetail(generics.RetrieveUpdateDestroyAPIView):
 
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
 
     def get_queryset(self):
         # Ensure that only the cart belonging to
@@ -186,7 +190,7 @@ class CartItemList(generics.ListCreateAPIView):
 
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
 
     def get_queryset(self):
         return CartItem.objects.filter(
@@ -205,8 +209,7 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
     the cart based on the authenticated user, cart id and item id
     """
 
-    # TODO remove access of OWNER after testing
-    permission_classes = [IsOwnerOrAdmin]  # TODO change to IsOwnerOrAdmin
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
 
@@ -252,11 +255,12 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
             instance.product.stock += decrease_amount
             instance.quantity = new_quantity
             instance.product.save()
-        elif new_quantity == 0:
+
+        if new_quantity == 0:
             instance.product.stock += current_quantity
-            instance.quantity = new_quantity
             instance.product.save()
-            return super().destroy(request, *args, **kwargs)
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         instance.save()
         serializer = self.get_serializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -283,11 +287,11 @@ class OrderList(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     # TODO remove access of OWNER after testing
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
 
     def create(self, request, *args, **kwargs):
         # Create the order for the authenticated user
-        customer = request.user
+        customer = request.user.customer
         cart = Cart.objects.get(customer=customer)
 
         cart_items = CartItem.objects.filter(cart=cart)
@@ -303,9 +307,8 @@ class OrderList(generics.ListCreateAPIView):
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
-                product=item.product,
-                quantity=item.quantity,
-                shipping_address=customer.address,
+                cart_item=item,
+                quantity=item.quantity
             )
 
         cart_items.delete()
@@ -321,12 +324,12 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
     """
 
     # TODO remove access of OWNER after testing
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsCustomerOrAdminForRelatedObjects]
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        return Order.objects.filter(customer=self.request.user)
+        return Order.objects.filter(customer=self.request.user.customer)
 
     def choose_address(self, request, *args, **kwargs):
         order = self.get_object()
@@ -352,7 +355,7 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
             )
             OrderItem.objects.create(
                 order=order,
-                product=cart_item.product,
+                cart_item=cart_item,
                 quantity=cart_item.quantity,
                 shipping_address=self.choose_address(request, *args, **kwargs),
             )
