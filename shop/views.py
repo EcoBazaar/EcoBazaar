@@ -5,10 +5,22 @@ from shop.serializers import (
     CategorySerializer,
     ProductImageSerializer,
 )
+from profile.serializers import (
+    SellerProductSerializer
+)
 from rest_framework import generics, filters
+from django.views.generic import ListView
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
+
+# for demo
+from django.shortcuts import get_object_or_404, redirect
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.detail import DetailView
+from profile.models import Cart, Seller
+import django_filters
 
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProductFilter
@@ -116,3 +128,125 @@ class ProductSearchView(generics.ListAPIView):
     serializer_class = ProductSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["name", "description", "category__name"]
+
+
+class SellerProductsAPIView(generics.RetrieveAPIView):
+    permission_classes = []
+    queryset = Seller.objects.all()
+    serializer_class = SellerProductSerializer
+    lookup_field = 'user__username'
+
+
+# create demo views:
+class ProductListView(ListView):
+    model = Product
+    template_name = 'shop/product_list.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        filter = ProductFilter(self.request.GET, queryset=queryset)
+        return filter.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = ProductFilter(
+            self.request.GET, queryset=self.get_queryset()
+        )
+        return context
+
+
+class AddToCartView(LoginRequiredMixin, View):
+    def post(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+        cart, created = Cart.objects.get_or_create(user=request.user)
+
+        cart.products.add(product)
+        # Redirect to the cart detail view
+        return redirect('cart-detail')
+
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'shop/product_detail.html'
+    context_object_name = 'product'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Get the seller's address and add it to the context
+        context['seller'] = self.object.seller
+        context['address'] = self.object.seller.address
+        return context
+
+
+class SellerProductListView(ListView):
+    model = Product
+    template_name = 'shop/seller_product_list.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        # Fetch the seller based on the username in the URL
+        self.seller = get_object_or_404(
+            Seller, user__username=self.kwargs['username']
+        )
+        # Filter products that belong to this seller
+        return Product.objects.filter(seller=self.seller)
+
+    def get_context_data(self, **kwargs):
+        # Pass additional seller and address information to the template
+        context = super().get_context_data(**kwargs)
+        context['seller'] = self.seller
+        context['address'] = self.seller.address
+        return context
+
+
+class CategoryListView(ListView):
+    model = Category
+    template_name = 'shop/category_list.html'
+    context_object_name = 'categories'
+
+# View for Category Detail
+
+
+class CategoryDetailView(DetailView):
+    model = Category
+    template_name = 'shop/category_detail.html'
+    context_object_name = 'category'
+
+    def get_context_data(self, **kwargs):
+        # Add the list of products in the category to the context
+        context = super().get_context_data(**kwargs)
+        context['products'] = self.object.category.all()
+        return context
+
+
+class ProductFilter(django_filters.FilterSet):
+    min_price = django_filters.NumberFilter(
+        field_name='price', lookup_expr='gte', label='Min Price'
+    )
+    max_price = django_filters.NumberFilter(
+        field_name='price', lookup_expr='lte', label='Max Price'
+    )
+    city = django_filters.CharFilter(
+        field_name='seller__address__city',
+        lookup_expr='icontains',
+        label='City'
+    )
+
+    class Meta:
+        model = Product
+        fields = ['min_price', 'max_price', 'city']
+
+
+class ProductSearchDemoView(ListView):
+    model = Product
+    template_name = 'shop/product_list.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(name__icontains=search_query)
+        return queryset

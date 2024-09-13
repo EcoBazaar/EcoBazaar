@@ -27,13 +27,14 @@ DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
-
-# Cloudinary configuration
+# Initialize Cloudinary
 cloudinary.config(
-    cloud_name=os.getenv('CLOUD_NAME'),  
-    api_key=os.getenv('API_KEY'),
-    api_secret=os.getenv('API_SECRET')
-    )
+    cloud_name = os.getenv('CLOUD_NAME'),
+    api_key = os.getenv('API_KEY'),
+    api_secret =  os.getenv('API_SECRET')
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # Application definition
@@ -98,8 +99,7 @@ WSGI_APPLICATION = "eco_bazaar.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-env = environ.Env()
-environ.Env.read_env()
+
 # Check if the app is running inside Docker
 if os.getenv('DOCKERIZED', 'false').lower() == 'true':
     # In Docker environment
@@ -155,9 +155,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'eco_bazaar/profile/static'),
+    os.path.join(BASE_DIR, 'eco_bazaar/shop/static'),
+]
+STATICFILES_DIRS = []
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# for csrf settings
+CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_HTTPONLY = False
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000']  # Add your domain if necessary

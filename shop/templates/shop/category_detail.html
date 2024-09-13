@@ -1,0 +1,42 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}{{ category.name }}{% endblock %}
+
+{% block content %}
+<div class="category-detail">
+    <h2>{{ category.name }}</h2>
+    <p>{{ category.description }}</p>
+    
+    <!-- Search Form -->
+    <form method="get" action="{% url 'category-detail-demo' category.slug %}">
+        <input type="text" name="search" placeholder="Search products..." value="{{ request.GET.search }}">
+        <input type="submit" value="Search">
+    </form>
+    
+    <!-- Filter Form -->
+    <form method="get" action="{% url 'category-detail-demo' category.slug %}">
+        <input type="number" name="price_min" placeholder="Min Price" value="{{ request.GET.price_min }}">
+        <input type="number" name="price_max" placeholder="Max Price" value="{{ request.GET.price_max }}">
+        <button type="submit">Filter</button>
+    </form>
+
+    <h3>Products</h3>
+    <div class="product-grid-category">
+        {% for product in products %}
+        <div class="product-card-category">
+            <a href="{% url 'product-detail-demo' product.id %}">
+                {% if product.product_images.all  %}
+                    <img src="{{ product.product_images.all.0.image.url }}" alt="{{ product.name }}" class="product-image-category">
+                {% else %}
+                    <img src="https://placehold.co/150x100" alt="default image" class="product-image-category">
+                {% endif %}
+                <h4>{{ product.name }}</h4>
+                <p>${{ product.price }}</p>
+            </a>
+        </div>
+        {% empty %}
+        <p>No products available in this category.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

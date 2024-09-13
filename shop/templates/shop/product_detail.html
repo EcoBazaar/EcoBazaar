@@ -1,0 +1,77 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="product-detail">
+    <div class="image-gallery">
+        <div class="carousel">
+            <button class="prev" onclick="prevImage()">&#10094;</button>
+            <div class="carousel-images">
+                {% if product.product_images.all %}
+                    {% for image in product.product_images.all %}
+                        <div class="image-wrapper">
+                            <img src="{{ image.image.url }}" alt="{{ product.name }}" class="carousel-image">
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="image-wrapper">
+                        <img src="https://placehold.co/640x426" alt="default image" class="carousel-image">
+                    </div>
+                {% endif %}
+            </div>
+            <button class="next" onclick="nextImage()">&#10095;</button>
+        </div>
+    </div>
+
+    <div class="product-info">
+        <h2>{{ product.name }}</h2>
+        <span class="price">${{ product.price }}</span>
+        
+        {% if product.is_new %}
+            <p><b>Is New:</b> Yes</p>
+        {% else %}
+            <p><b>Is New:</b> No</p>
+        {% endif %}
+        <p><b>stock:</b> {{ product.stock }}</p>
+        <h3>Seller: <a href="{% url 'seller-products-demo' product.seller.user.username %}">{{ product.seller.user.username }}</a></h3>
+        <p>Location: {{ product.seller.address.city }}, {{ product.seller.address.street }}</p>
+
+        <!-- Add to cart form -->
+        <form method="POST" action="{% url 'add-to-cart-demo' product.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn">Add to Cart</button>
+        </form>
+    </div>
+</div>
+
+<!-- Separate section for the product description below both image and info -->
+<div class="product-description">
+    <h3>Description</h3>
+    <p>{{ product.description }}</p>
+</div>
+
+<script>
+    let currentImageIndex = 0;
+    const images = document.querySelectorAll('.carousel-image');
+
+    function showImage(index) {
+        images.forEach((img, i) => {
+            img.style.display = i === index ? 'block' : 'none';
+        });
+    }
+
+    function nextImage() {
+        currentImageIndex = (currentImageIndex + 1) % images.length;
+        showImage(currentImageIndex);
+    }
+
+    function prevImage() {
+        currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+        showImage(currentImageIndex);
+    }
+
+    // Show the first image initially
+    showImage(currentImageIndex);
+</script>
+{% endblock %}

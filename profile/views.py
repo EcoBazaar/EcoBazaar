@@ -1,18 +1,28 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, permissions, serializers
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django.views.generic.edit import UpdateView
+
+# for demo
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView
+from django.shortcuts import get_object_or_404
 
 from profile.models import Customer, Seller, Order, OrderItem, Cart, CartItem
 from profile.permission import (
     IsOwnerOrAdmin,
     IsCustomerOrAdminForRelatedObjects,
     IsSellerOrAdmin
-    )
+)
 from profile.serializers import (
     CustomerSerializer,
     SellerSerializer,
@@ -20,7 +30,7 @@ from profile.serializers import (
     CartSerializer,
     OrderSerializer,
     UserSerializer,
-    SellerUsernameSerializer,
+    SellerProductSerializer,
 )
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -57,7 +67,7 @@ class SellerDetail(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user == seller.user or self.request.user.is_staff:
             return SellerSerializer  # Full profile for seller and admin
         else:
-            return SellerUsernameSerializer  # Limited profile for others
+            return SellerProductSerializer  # Limited profile for others
 
 
 class RegisterView(APIView):
@@ -69,44 +79,23 @@ class RegisterView(APIView):
         if user_serializer.is_valid():
             user = user_serializer.save()
 
-            # Check the role and create the appropriate profile
-            if request.data.get("role") == "seller":
-                seller_serializer = SellerSerializer(
-                    data={
-                        "user": user.id, "address": request.data.get("address")
-                        }
-                )
-
-                if seller_serializer.is_valid():
-                    seller_serializer.save()
-                else:
-                    user.delete()
-                    return Response(
-                        seller_serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-            else:  # Default to customer if role is not 'seller'
-                customer_serializer = CustomerSerializer(
-                    data={
-                        "user": user.id, "address":
-                        request.data.get("address")
-                    }
-                )
-
-                if customer_serializer.is_valid():
-                    customer_serializer.save()
-                else:
-                    user.delete()
-                    return Response(
-                        customer_serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-            return Response(
-                {"message": "User created successfully"},
-                status=status.HTTP_201_CREATED
+            # Create default Customer profile for the user
+            customer_serializer = CustomerSerializer(
+                data={"user": user.id}
             )
+
+            if customer_serializer.is_valid():
+                customer_serializer.save()
+                return Response(
+                    {"message": "User created as a Customer successfully"},
+                    status=status.HTTP_201_CREATED
+                )
+            else:
+                user.delete()
+                return Response(
+                    customer_serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         return Response(
             user_serializer.errors, status=status.HTTP_400_BAD_REQUEST
@@ -220,7 +209,7 @@ class CartItemDetail(generics.RetrieveUpdateDestroyAPIView):
         customer_id = self.kwargs.get("customer_id")
         queryset = CartItem.objects.filter(
             cart__customer__id=customer_id, pk=item_id
-            )
+        )
 
         if not queryset.exists():
             raise serializers.ValidationError("Cart item not found")
@@ -368,3 +357,218 @@ class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response(
             self.get_serializer(order).data, status=status.HTTP_200_OK
         )
+
+
+# Profile API View
+class ProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        customer = Customer.objects.filter(user=user).first()
+        seller = Seller.objects.filter(user=user).first()
+
+        if customer:
+            user_data = CustomerSerializer(customer).data
+        elif seller:
+            user_data = SellerSerializer(seller).data
+        else:
+            return Response(
+                {"error": "User is neither a customer nor a seller."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(user_data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        user = request.user
+        # Check if the user is already a seller
+        if Seller.objects.filter(user=user).exists():
+            return Response(
+                {"error": "You are already a seller."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Upgrade user to seller
+        customer = Customer.objects.filter(user=user).first()
+        if not customer:
+            return Response(
+                {"error": "You need to be a customer to upgrade to seller."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        seller_data = {
+            "user": user.id,
+            # Assuming address is included in the request
+            "address": request.data.get("address", ""),
+        }
+        seller_serializer = SellerSerializer(data=seller_data)
+
+        if seller_serializer.is_valid():
+            seller_serializer.save()
+            return Response(
+                {"message": "Successfully upgraded to Seller."},
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                seller_serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class UpgradeToSellerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        # Check if the user is already a seller
+        if Seller.objects.filter(user=user).exists():
+            return Response(
+                {"error": "User is already a seller."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create a seller profile
+        seller_serializer = SellerSerializer(
+            data={
+                "user": user.id,
+                "address": request.data.get("address")
+            }
+        )
+
+        if seller_serializer.is_valid():
+            seller_serializer.save()
+            return Response(
+                {"message": "User upgraded to seller successfully."},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                seller_serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+# demo views
+# Register View
+
+
+class RegisterDemoView(View):
+    def get(self, request):
+        return render(request, 'profile/register.html')
+
+    def post(self, request):
+        data = {
+            "username": request.POST['username'],
+            "email": request.POST['email'],
+            "password": request.POST['password'],
+            "first_name": request.POST['first_name'],
+            "last_name": request.POST['last_name'],
+        }
+        user_serializer = UserSerializer(data=data)
+
+        if user_serializer.is_valid():
+            user = user_serializer.save()
+            # Create a Customer profile for the newly registered user
+            customer_serializer = CustomerSerializer(
+                data={"user": user.id}
+            )
+
+            if customer_serializer.is_valid():
+                customer_serializer.save()
+                messages.success(
+                    request, "Registration successful. Please log in.")
+                # Redirect to login after successful registration
+                return redirect('login-demo')
+            else:
+                user.delete()
+                errors = customer_serializer.errors
+                return render(
+                    request, 'profile/register.html', {"errors": errors}
+                )
+        else:
+            errors = user_serializer.errors
+            return render(
+                request, 'profile/register.html', {"errors": errors}
+            )
+
+# Login View
+
+
+class LoginDemoView(View):
+    def get(self, request):
+        return render(request, 'profile/login.html')
+
+    def post(self, request):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(
+            request, username=username, password=password
+        )
+
+        if user is not None:
+            login(request, user)
+            # Redirect to home or other page after login
+            return redirect('products-demo')
+        else:
+            messages.error(request, "Invalid credentials")
+            return render(request, 'profile/login.html')
+
+# Logout View
+
+
+class LogoutDemoView(View):
+    def get(self, request):
+        logout(request)
+        return redirect('products-demo')  # Redirect to login after logout
+
+
+class ProfileView(LoginRequiredMixin, UpdateView):
+    model = Customer
+    template_name = 'profile/profile.html'
+    fields = ['address']  # Fields you want to allow the user to update
+    # Redirect after a successful update
+    success_url = reverse_lazy('profile-view')
+
+    def get_object(self, queryset=None):
+        # Get the Customer object for the currently logged-in user
+        return get_object_or_404(Customer, user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        return context
+
+
+class UpgradeToSellerDemoView(View):
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        # Debug: print user information to verify request.user
+        print(f"Upgrading user: {user}")
+
+        if Seller.objects.filter(user=user).exists():
+            messages.info(request, "You are already a seller.")
+        else:
+            try:
+                Seller.objects.create(user=user)
+                messages.success(
+                    request,
+                    "You have been upgraded to a seller."
+                )
+            except Exception as e:
+                # Debug: Print the error in case of failure
+                print(f"Error creating seller: {e}")
+                messages.error(
+                    request,
+                    "There was an issue upgrading to a seller.\
+                          Please try again."
+                )
+
+        return redirect('profile-view')
+
+
+class ProductCreateView(CreateView):
+    pass
