@@ -68,3 +68,4 @@ urlpatterns = [
          name='upgrade-to-seller-demo'),
     path('add-product/', ProductCreateView.as_view(), name='add-product-demo'),
 ]
+# comment
