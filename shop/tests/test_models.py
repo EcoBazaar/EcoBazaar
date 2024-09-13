@@ -61,7 +61,6 @@ class ProductAPITest(APITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    
     def test_retrieve_product_as_authenticated_user(self):
         self.client.force_authenticate(user=self.superuser)
         self.client.force_authenticate(

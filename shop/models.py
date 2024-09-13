@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.validators import MinValueValidator
-from cloudinary.models import CloudinaryField
 
 
 class Category(models.Model):
@@ -38,7 +37,10 @@ class ProductImage(models.Model):
     product = models.ForeignKey(
         Product, related_name="product_images", on_delete=models.CASCADE
     )
-    image = CloudinaryField('image')
+    image_url = models.URLField(
+        max_length=200,
+        default="https://fakeimg.pl/300x200"
+        )  # Cloudinary image URL
 
     def __str__(self):
         return self.product.name

@@ -42,7 +42,10 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ["user", "address", "products", "address_details"]
-           
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['address'].required = False
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -154,7 +157,9 @@ class CartSerializer(serializers.ModelSerializer):
 
 
 class SellerProductSerializer(serializers.ModelSerializer):
-    products = ProductSerializer(many=True, read_only=True, source="user.product_set")
+    products = ProductSerializer(
+        many=True, read_only=True, source="user.product_set"
+    )
     address = AddressSerializer(read_only=True, source="address")
 
     class Meta:

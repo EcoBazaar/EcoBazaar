@@ -483,12 +483,16 @@ class RegisterDemoView(View):
                 # Redirect to login after successful registration
                 return redirect('login-demo')
             else:
-                user.delete()  # Cleanup: delete the user if profile creation fails
+                user.delete()
                 errors = customer_serializer.errors
-                return render(request, 'profile/register.html', {"errors": errors})
+                return render(
+                    request, 'profile/register.html', {"errors": errors}
+                )
         else:
             errors = user_serializer.errors
-            return render(request, 'profile/register.html', {"errors": errors})
+            return render(
+                request, 'profile/register.html', {"errors": errors}
+            )
 
 # Login View
 
@@ -500,7 +504,9 @@ class LoginDemoView(View):
     def post(self, request):
         username = request.POST.get('username')
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(
+            request, username=username, password=password
+        )
 
         if user is not None:
             login(request, user)
@@ -536,7 +542,7 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class UpgradeToSellerView(View):
+class UpgradeToSellerDemoView(View):
     def post(self, request, *args, **kwargs):
         user = request.user
 
@@ -549,12 +555,17 @@ class UpgradeToSellerView(View):
             try:
                 Seller.objects.create(user=user)
                 messages.success(
-                    request, "You have been upgraded to a seller.")
+                    request,
+                    "You have been upgraded to a seller."
+                )
             except Exception as e:
                 # Debug: Print the error in case of failure
                 print(f"Error creating seller: {e}")
                 messages.error(
-                    request, "There was an issue upgrading to a seller. Please try again.")
+                    request,
+                    "There was an issue upgrading to a seller.\
+                          Please try again."
+                )
 
         return redirect('profile-view')
 
