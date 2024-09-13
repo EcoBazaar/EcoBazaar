@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'shop/base.html' %}
 
 {% block title %}Category List{% endblock %}
 
@@ -8,7 +8,7 @@
     <div class="category-card">
         <h2>{{ category.name }}</h2>
         <p>{{ category.description }}</p>
-        <a href="{% url 'category-detail' category.slug %}" class="btn">View Products</a>
+        <a href="{% url 'category-detail-demo' category.slug %}" class="btn">View Products</a>
     </div>
     {% endfor %}
 </div>

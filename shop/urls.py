@@ -9,7 +9,13 @@ from shop.views import (
     ProductSearchView,
 
     #view for demo
-    ProductListView
+    ProductListView,
+    ProductDetailView,
+    AddToCartView,
+    SellerProductListView,
+    CategoryListView,
+    CategoryDetailView,
+    ProductSearchView,
 )
 
 
@@ -25,5 +31,11 @@ urlpatterns = [
     path("api/search/", ProductSearchView.as_view(), name="search"),
 
     # url for demo
-    path('products/', ProductListView.as_view(), name='product-list'),
+    path('products/', ProductListView.as_view(), name='products-demo'),
+    path('product/<int:pk>/', ProductDetailView.as_view(), name='product-detail-demo'),
+    path('product/<int:product_id>/add-to-cart/', AddToCartView.as_view(), name='add-to-cart-demo'),
+    path('seller/<str:username>/products/', SellerProductListView.as_view(), name='seller-products-demo'),
+    path('categories/', CategoryListView.as_view(), name='category-list-demo'),  # Category List URL
+    path('categories/<slug:slug>/', CategoryDetailView.as_view(), name='category-detail-demo'),  # Category Detail URL
+    path('search/', ProductSearchView.as_view(), name='search-demo'),  # Category Detail URL
 ]

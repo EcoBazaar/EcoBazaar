@@ -1,0 +1,9 @@
+{% extends 'profile/base.html' %}
+
+{% block content %}
+<h1>Upgrade to Seller</h1>
+<form method="post" action="{% url 'upgrade-to-seller' %}">
+    {% csrf_token %}
+    <button type="submit">Upgrade to Seller</button>
+</form>
+{% endblock %}

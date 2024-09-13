@@ -3,20 +3,37 @@
 {% block title %}Product List{% endblock %}
 
 {% block content %}
+<div class="product-search-filter">
+    <!-- Search Form -->
+    <form method="get" action="{% url 'search-demo' %}" class="search-form">
+        <input type="text" name="search" placeholder="Search products" value="{{ request.GET.search }}">
+        <button type="submit" class="search-btn">Search</button>
+    </form>
+
+    <!-- Filter Form -->
+    <form method="get" action="{% url 'products-demo' %}" class="filter-form">
+        <input type="number" name="min_price" placeholder="Min Price" value="{{ request.GET.min_price }}">
+        <input type="number" name="max_price" placeholder="Max Price" value="{{ request.GET.max_price }}">
+        <input type="text" name="city" placeholder="City" value="{{ request.GET.city }}">
+        <button type="submit" class="filter-btn">Filter</button>
+    </form>
+</div>
+
 <div class="product-container">
     {% for product in products %}
     <div class="product-card">
         {% if product.product_images.all %}
-             <img src="{{ product.product_images.all.0.image.url }}" alt="{{ product.name }}">
-         {% else %}
-         <img src="https://placehold.co/300x200" alt="default image">
-         {% endif %}
+            <img src="{{ product.product_images.all.0.image.url }}" alt="{{ product.name }}">
+        {% else %}
+            <img src="https://placehold.co/300x200" alt="default image">
+        {% endif %}
         <h2>{{ product.name }}</h2>
         <p>{{ product.description }}</p>
         <span>${{ product.price }}</span>
-        <a href="{% url 'product-detail' product.id %}" class="btn">View Details</a>
+        <a href="{% url 'product-detail-demo' product.id %}" class="btn">View Details</a>
     </div>
+    {% empty %}
+    <p>No products found.</p>
     {% endfor %}
 </div>
 {% endblock %}
-

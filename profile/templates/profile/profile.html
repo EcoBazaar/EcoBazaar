@@ -1,0 +1,141 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block css %}
+      <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>User Profile</h1>
+
+  <!-- User Information -->
+  <div class="user-info">
+      <h2>Personal Information</h2>
+      <p><strong>Username:</strong> demo_user</p>
+      <p><strong>First Name:</strong> John</p>
+      <p><strong>Last Name:</strong> Doe</p>
+
+      <!-- Button to change user data -->
+      <button class="btn change-user-data">Change User Data</button>
+  </div>
+
+  <!-- Address Information -->
+  <div class="address-section">
+      <h2>Addresses</h2>
+
+      <!-- First Address (Shipping Address) -->
+      <div class="address">
+          <p><strong>Street:</strong> 123 Main St</p>
+          <p><strong>City:</strong> New York</p>
+          <p><strong>Phone:</strong> +123456789</p>
+          <span class="tag shipping-address">Shipping Address</span>
+          <div class="address-actions">
+              <button class="btn">Change</button>
+              <button class="btn danger">Delete</button>
+          </div>
+      </div>
+
+      <!-- Second Address -->
+      <div class="address">
+          <p><strong>Street:</strong> 456 Elm St</p>
+          <p><strong>City:</strong> Los Angeles</p>
+          <p><strong>Phone:</strong> +987654321</p>
+          <div class="address-actions">
+              <button class="btn">Change</button>
+              <button class="btn danger">Delete</button>
+          </div>
+      </div>
+
+      <button class="btn add-address">Add New Address</button>
+  </div>
+
+  <!-- Cart Section -->
+  <div class="cart-section">
+      <h2>My Cart</h2>
+      <table class="cart-table">
+          <thead>
+              <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                  <th>Action</th>
+              </tr>
+          </thead>
+          <tbody id="cart-items">
+              <tr>
+                  <td>Product 1</td>
+                  <td>$10</td>
+                  <td>
+                      <button class="btn-minus" onclick="updateQuantity(-1, 0)">-</button>
+                      <span id="quantity-0">1</span>
+                      <button class="btn-plus" onclick="updateQuantity(1, 0)">+</button>
+                  </td>
+                  <td id="total-0">$10</td>
+                  <td><button class="btn danger" onclick="removeItem(0)">Delete</button></td>
+              </tr>
+              <tr>
+                  <td>Product 2</td>
+                  <td>$25</td>
+                  <td>
+                      <button class="btn-minus" onclick="updateQuantity(-1, 1)">-</button>
+                      <span id="quantity-1">1</span>
+                      <button class="btn-plus" onclick="updateQuantity(1, 1)">+</button>
+                  </td>
+                  <td id="total-1">$25</td>
+                  <td><button class="btn danger" onclick="removeItem(1)">Delete</button></td>
+              </tr>
+          </tbody>
+      </table>
+      <p><strong>Total Price: $<span id="total-price">35</span></strong></p>
+  </div>
+
+  <!-- Seller Section -->
+  <div class="seller-section">
+      <h2>Seller Options</h2>
+      <button id="upgrade-btn" class="btn upgrade" onclick="upgradeToSeller()">Upgrade to Seller</button>
+      <!-- Hidden button for adding a product -->
+      <button id="add-product-btn" class="btn add-product" style="display:none;">Add New Product</button>
+  </div>
+</div>
+
+<script>
+  // Function to update the quantity of a product
+  function updateQuantity(change, index) {
+      const quantityElem = document.getElementById(`quantity-${index}`);
+      let quantity = parseInt(quantityElem.innerText) + change;
+      if (quantity < 1) return;
+      
+      const price = index === 0 ? 10 : 25; // Adjust based on the product
+      quantityElem.innerText = quantity;
+
+      const totalElem = document.getElementById(`total-${index}`);
+      totalElem.innerText = `$${price * quantity}`;
+      
+      updateTotalPrice();
+  }
+
+  // Function to remove an item from the cart
+  function removeItem(index) {
+      const row = document.getElementById('cart-items').rows[index];
+      row.remove();
+      updateTotalPrice();
+  }
+
+  // Function to update the total price
+  function updateTotalPrice() {
+      let totalPrice = 0;
+      document.querySelectorAll('[id^=total-]').forEach(elem => {
+          totalPrice += parseFloat(elem.innerText.replace('$', ''));
+      });
+      document.getElementById('total-price').innerText = totalPrice;
+  }
+
+  // Function to upgrade to seller and show "Add Product" button
+  function upgradeToSeller() {
+      document.getElementById('upgrade-btn').style.display = 'none';
+      document.getElementById('add-product-btn').style.display = 'block';
+  }
+</script>
+{% endblock %}
+  

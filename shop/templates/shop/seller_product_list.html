@@ -1,0 +1,26 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}{{ seller.user.username }}'s Products{% endblock %}
+
+{% block content %}
+<div class="seller-details">
+    <h1>Products by {{ seller.user.username }}</h1>
+    <p>Location: {{ address.city }}, {{ address.street }} | Phone: {{ address.phone_number }}</p>
+</div>
+
+<div class="product-container">
+    {% for product in products %}
+    <div class="product-card">
+        {% if product.product_images.all %}
+            <img src="{{ product.product_images.all.0.image.url }}" alt="{{ product.name }}">
+        {% else %}
+            <img src="https://placehold.co/300x200" alt="default image">
+        {% endif %}
+        <h2>{{ product.name }}</h2>
+        <p>{{ product.description }}</p>
+        <span>${{ product.price }}</span>
+        <a href="{% url 'product-detail-demo' product.id %}" class="btn">View Details</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

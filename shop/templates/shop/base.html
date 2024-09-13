@@ -3,19 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Shop{% endblock %}</title>
+    <title>{% block title %}Eco Bazaar{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    {% block css %}
+
+    {% endblock %}
 </head>
 <body>
     <header>
-        <h1>My Shop</h1>
+        <h1>EcoBazaar</h1>
         <nav>
             <ul>
-                <li><a href="{% url 'products' %}">Products</a></li>
-                <li><a href="{% url 'categories' %}">Categories</a></li>
-                <li><a href="{% url 'images' %}">Images</a></li>
-                <li><a href="{% url 'search' %}">Search</a></li>
+                <li><a href="{% url 'products-demo' %}">Products</a></li>
+                <li><a href="{% url 'category-list-demo' %}">Categories</a></li>
+                <li>{% if user.is_authenticated %}
+                    <!-- Display when user is logged in -->
+                    {% comment %} <a href="{% url 'profile-demo' %}">Profile</a> {% endcomment %}
+                    <span>Hi {{user.username}} </span> <a  href="{% url 'logout-demo' %}" class="button-logout">Logout</a>
+                {% else %}
+                    <!-- Display when user is not logged in -->
+                    <a href="{% url 'login-demo' %}" class="button-login">Login /</a>
+                    <a href="{% url 'register-demo' %}" class="button-register">Register</a>
+                {% endif %}</li>
             </ul>
+
         </nav>
     </header>
 
@@ -26,7 +37,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2024 My Shop. All rights reserved.</p>
+        <p>&copy; 2024 Eco Bazaar. All rights reserved.</p>
     </footer>
 </body>
 </html>

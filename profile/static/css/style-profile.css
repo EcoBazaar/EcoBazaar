@@ -1,0 +1,93 @@
+
+
+/* Container Styles */
+.login-container, .register-container {
+    background-color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    max-width: 100%;
+    margin: auto; /* Center the containers */
+    margin-top: 2rem; /* Add spacing from the top */
+}
+
+/* Button styles */
+.button-login, .button-register, .button-logout {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.button-login:hover, .button-register:hover, .button-logout:hover {
+    background-color: #0056b3;
+}
+
+/* Form Input Styles */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: #5a67d8;
+    box-shadow: 0 0 5px rgba(90, 103, 216, 0.5);
+}
+
+/* Button Styles */
+button[type="submit"] {
+    background-color: #5a67d8;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #434190;
+}
+
+/* Error Message Styles */
+.error-messages {
+    background-color: #ffe6e6;
+    border-left: 4px solid #f56565;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.error-messages ul {
+    list-style-type: none;
+    padding-left: 0;
+    color: #f56565;
+    font-weight: bold;
+}
+
+.error-messages li {
+    margin-bottom: 5px;
+}
