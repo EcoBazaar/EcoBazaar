@@ -160,7 +160,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'eco_bazaar/profile/static'),
     os.path.join(BASE_DIR, 'eco_bazaar/shop/static'),
 ]
-STATICFILES_DIRS = []
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
