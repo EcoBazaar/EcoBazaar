@@ -63,7 +63,7 @@ urlpatterns = [
     path('api/profile/', ProfileAPIView.as_view(), name='profile-api'),
 
     # demo
-    path('', ProfileView.as_view(), name='profile-view'),
+    path('', ProfileView.as_view(), name='profile-view-demo'),
     path('upgrade-to-seller/', UpgradeToSellerView.as_view(),
          name='upgrade-to-seller-demo'),
     path('add-product/', ProductCreateView.as_view(), name='add-product-demo'),

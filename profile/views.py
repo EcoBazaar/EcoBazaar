@@ -530,7 +530,7 @@ class ProfileView(LoginRequiredMixin, UpdateView):
     template_name = 'profile/profile.html'
     fields = ['address']  # Fields you want to allow the user to update
     # Redirect after a successful update
-    success_url = reverse_lazy('profile-view')
+    success_url = reverse_lazy('profile-view-demo')
 
     def get_object(self, queryset=None):
         # Get the Customer object for the currently logged-in user
