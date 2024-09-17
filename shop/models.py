@@ -39,6 +39,6 @@ class ProductImage(models.Model):
         Product, related_name="product_images", on_delete=models.CASCADE
     )
     image = CloudinaryField('image', default="https://fakeimg.pl/300x200")
-       
+    
     def __str__(self):
         return self.product.name
