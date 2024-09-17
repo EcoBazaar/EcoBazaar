@@ -17,7 +17,7 @@
             <img src="https://placehold.co/300x200" alt="default image">
         {% endif %}
         <h2>{{ product.name }}</h2>
-        <p>{{ product.description }}</p>
+        <p>{{ product.description|slice:":40" }}{% if product.description|length > 30 %}...{% endif %}</p>
         <span>${{ product.price }}</span>
         <a href="{% url 'product-detail-demo' product.id %}" class="btn">View Details</a>
     </div>
