@@ -33,15 +33,16 @@
         {% else %}
             <p><b>Is New:</b> No</p>
         {% endif %}
-        <p><b>stock:</b> {{ product.stock }}</p>
+        <p><b>Stock:</b> {{ product.stock }}</p>
         <h3>Seller: <a href="{% url 'seller-products-demo' product.seller.user.username %}">{{ product.seller.user.username }}</a></h3>
         <p>Location: {{ product.seller.address.city }}, {{ product.seller.address.street }}</p>
 
         <!-- Add to cart form -->
-        <form method="POST" action="{% url 'add-to-cart-demo' product.id %}">
+        <form id="add-to-cart-form" method="POST" action="{% url 'add-to-cart-demo' product.id %}">
             {% csrf_token %}
-            <button type="submit" class="btn">Add to Cart</button>
+            <button type="button" class="btn" onclick="handleAddToCart()">Add to Cart</button>
         </form>
+        <div id="message" style="display:none; color:green;">This product has been added to your cart.</div>
     </div>
 </div>
 
@@ -73,5 +74,15 @@
 
     // Show the first image initially
     showImage(currentImageIndex);
+
+    function handleAddToCart() {
+        {% if user.is_authenticated %}
+            // Dummy message for demo purposes
+            document.getElementById('message').style.display = 'block';
+        {% else %}
+            // Redirect to login page if not authenticated
+            window.location.href = "{% url 'login-demo' %}";
+        {% endif %}
+    }
 </script>
 {% endblock %}
