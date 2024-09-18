@@ -50,45 +50,159 @@
   </div>
 
   <!-- Cart Section -->
-  <div class="cart-section">
-      <h2>My Cart</h2>
-      <table class="cart-table">
-          <thead>
-              <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Total</th>
-                  <th>Action</th>
-              </tr>
-          </thead>
-          <tbody id="cart-items">
-              <tr>
-                  <td>Product 1</td>
-                  <td>$10</td>
-                  <td>
-                      <button class="btn-minus" onclick="updateQuantity(-1, 0)">-</button>
-                      <span id="quantity-0">1</span>
-                      <button class="btn-plus" onclick="updateQuantity(1, 0)">+</button>
-                  </td>
-                  <td id="total-0">$10</td>
-                  <td><button class="btn danger" onclick="removeItem(0)">Delete</button></td>
-              </tr>
-              <tr>
-                  <td>Product 2</td>
-                  <td>$25</td>
-                  <td>
-                      <button class="btn-minus" onclick="updateQuantity(-1, 1)">-</button>
-                      <span id="quantity-1">1</span>
-                      <button class="btn-plus" onclick="updateQuantity(1, 1)">+</button>
-                  </td>
-                  <td id="total-1">$25</td>
-                  <td><button class="btn danger" onclick="removeItem(1)">Delete</button></td>
-              </tr>
-          </tbody>
-      </table>
-      <p><strong>Total Price: $<span id="total-price">35</span></strong></p>
-  </div>
+  <div class="container">
+    <h1>User Profile</h1>
+
+    <!-- Cart Section -->
+    <div class="cart-section">
+        <h2>My Cart</h2>
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="cart-items">
+                <tr>
+                    <td>Product 1</td>
+                    <td>$10</td>
+                    <td>
+                        <button class="btn-minus" onclick="updateQuantity(-1, 0)">-</button>
+                        <span id="quantity-0">1</span>
+                        <button class="btn-plus" onclick="updateQuantity(1, 0)">+</button>
+                    </td>
+                    <td id="total-0">$10</td>
+                    <td><button class="btn danger" onclick="removeItem(0)">Delete</button></td>
+                </tr>
+                <tr>
+                    <td>Product 2</td>
+                    <td>$25</td>
+                    <td>
+                        <button class="btn-minus" onclick="updateQuantity(-1, 1)">-</button>
+                        <span id="quantity-1">1</span>
+                        <button class="btn-plus" onclick="updateQuantity(1, 1)">+</button>
+                    </td>
+                    <td id="total-1">$25</td>
+                    <td><button class="btn danger" onclick="removeItem(1)">Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p><strong>Total Price: $<span id="total-price">35</span></strong></p>
+
+        <!-- Button to create a new order from the cart -->
+        <button class="btn add-to-order" onclick="addToNewOrder()">Add to New Order</button>
+
+        <!-- View Orders button -->
+        <button class="btn" onclick="window.location.href='/orders/'">View Orders</button>
+    </div>
+
+    <!-- Orders Section -->
+    <div class="orders-section">
+        <h2>My Orders</h2>
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Total Price</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>#12345</td>
+                    <td>$35</td>
+                    <td>2024-09-18</td>
+                    <td>Shipped</td>
+                    <td><button class="btn">View Details</button></td>
+                </tr>
+                <tr>
+                    <td>#67890</td>
+                    <td>$50</td>
+                    <td>2024-09-10</td>
+                    <td>Delivered</td>
+                    <td><button class="btn">View Details</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Function to update the quantity of a product
+    function updateQuantity(change, index) {
+        const quantityElem = document.getElementById(`quantity-${index}`);
+        let quantity = parseInt(quantityElem.innerText) + change;
+        if (quantity < 1) return;
+        
+        const price = index === 0 ? 10 : 25; // Adjust based on the product
+        quantityElem.innerText = quantity;
+
+        const totalElem = document.getElementById(`total-${index}`);
+        totalElem.innerText = `$${price * quantity}`;
+        
+        updateTotalPrice();
+    }
+
+    // Function to remove an item from the cart
+    function removeItem(index) {
+        const row = document.getElementById('cart-items').rows[index];
+        row.remove();
+        updateTotalPrice();
+    }
+
+    // Function to update the total price
+    function updateTotalPrice() {
+        let totalPrice = 0;
+        document.querySelectorAll('[id^=total-]').forEach(elem => {
+            totalPrice += parseFloat(elem.innerText.replace('$', ''));
+        });
+        document.getElementById('total-price').innerText = totalPrice;
+    }
+
+    // Function to add the current cart to a new order
+    function addToNewOrder() {
+        // Collect cart items data
+        const cartItems = [];
+        document.querySelectorAll('#cart-items tr').forEach((row, index) => {
+            const product = row.cells[0].innerText;
+            const price = parseFloat(row.cells[1].innerText.replace('$', ''));
+            const quantity = parseInt(row.cells[2].querySelector('span').innerText);
+            cartItems.push({ product, price, quantity });
+        });
+
+        // Send the cart data to the backend to create a new order
+        fetch('/create-order/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'  // Make sure you have the CSRF token included for Django
+            },
+            body: JSON.stringify({
+                items: cartItems,
+                total_price: document.getElementById('total-price').innerText
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Order successfully created!');
+                window.location.href = `/order/${data.order_id}/`;  // Redirect to the order detail page
+            } else {
+                alert('Failed to create order.');
+            }
+        })
+        .catch(error => {
+            console.error('Error creating order:', error);
+        });
+    }
+</script>
+
 
   <!-- Seller Section -->
   <div class="seller-section">

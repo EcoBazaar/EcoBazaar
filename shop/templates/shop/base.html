@@ -20,6 +20,7 @@
                     <!-- Display when user is logged in -->
                     {% comment %} <a href="{% url 'profile-demo' %}">Profile</a> {% endcomment %}
                     <span>Hi {{user.username}} </span> <a  href="{% url 'logout-demo' %}" class="button-logout">Logout</a>
+                    <a  href="{% url 'profile-view-demo' %}" class="button-logout">My Profile</a>
                 {% else %}
                     <!-- Display when user is not logged in -->
                     <a href="{% url 'login-demo' %}" class="button-login">Login /</a>
